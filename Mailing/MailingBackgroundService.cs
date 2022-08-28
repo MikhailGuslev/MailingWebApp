@@ -86,7 +86,8 @@ public sealed class MailingBackgroundService : BackgroundService, IMailingServic
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex.Message, ex);
+            string error = "В процессе обновления состояния рассылок возникло исключение {exception}";
+            Logger.LogError(error, ex);
         }
     }
 
