@@ -2,10 +2,12 @@ using Mailing;
 using Mailing.Abstractions;
 using Mailing.Repositories;
 using Mailing.Settings;
+using NLog.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.AddConsole();
+builder.Logging.ClearProviders();
+builder.Logging.AddNLog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
