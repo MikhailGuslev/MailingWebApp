@@ -66,6 +66,8 @@ public sealed class EmailSendingScheduler
             ListenedTriggers.Add(trigger);
         }
 
+        Logger.LogInformation("Восстановлено из хранилища {total} рассылок", ListenedTriggers.Count);
+
         await Task.CompletedTask;
     }
 
