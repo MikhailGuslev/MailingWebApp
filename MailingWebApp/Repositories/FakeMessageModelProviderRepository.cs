@@ -1,5 +1,5 @@
-﻿using DataLayer;
-using Mailing.Abstractions;
+﻿using Mailing.Abstractions;
+using Mailing.Models;
 
 namespace MailingWebApp.Repositories;
 
@@ -24,7 +24,7 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
 
     private sealed record class FakeMessageModelProvider : IMessageModelProvider
     {
-        public async Task<IMessageModel> GetModelAsync(User recipient)
+        public async Task<IMessageModel> GetModelAsync(Recipient recipient)
         {
             await Task.CompletedTask;
 

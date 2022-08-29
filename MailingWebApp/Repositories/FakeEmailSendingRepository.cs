@@ -1,6 +1,6 @@
-﻿using DataLayer;
-using Mailing.Abstractions;
+﻿using Mailing.Abstractions;
 using Mailing.Models;
+using OpenReceivingMeterReadingsPeriodModelProvider;
 
 namespace MailingWebApp.Repositories;
 
@@ -10,7 +10,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 
     private const int FakeSize = 10;
 
-    private readonly List<User> FakeUsers;
+    private readonly List<Recipient> FakeUsers;
     private readonly List<EmailSending> FakeSendings;
     private readonly List<EmailSendingSchedule> FakeSchedules;
 
@@ -19,7 +19,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         IEnumerable<int> faker = Enumerable.Range(1, FakeSize);
 
         FakeUsers = faker
-            .Select(i => new User
+            .Select(i => new Recipient
             {
                 UserId = i,
                 Email = $"user_{i}@gmail.com"
@@ -85,10 +85,13 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 
     private MessageTemplate GetDynamicFakeTemplate(int fakeId)
     {
-        string fakeSubjectTemplate = @$"DYNAMIC SUBJECT_{fakeId}" + @"{{subject_model.value}}";
-        string fakeBodyTemplate = $"DYNAMIC FAKE CONTENT_{fakeId}" +
-@"{{ for item in body_model.items }}
-    😺 {{ item }}
+        string fakeSubjectTemplate = @$"[FAKE] Открыт приём показаний ПУ";
+        string fakeBodyTemplate =
+@"{{ for item in body_model.meter_readings_period_details }}
+    * Поставщик {{ item.service_provider_name }} 
+        Услуга {{ item.provided_service_name }}  
+        ПУ {{item.metering_device}} 
+        с {{item.start_taking_readings}} по {{item.end_taking_readings}}
 {{ end }}
 ";
 
@@ -100,9 +103,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
             IsBodyStatic = false,
             IsSubjectStatic = false,
             ContentType = Mailing.Enums.MessageContentType.PlainText,
-            ModelProvider = fakeMessageModelProviderRepository
-                .GetMessageModelProviderAsync("FAKE")
-                .Result
+            ModelProvider = new FakeMessageModelProvider()
         };
     }
 }
