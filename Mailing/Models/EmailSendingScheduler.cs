@@ -1,6 +1,7 @@
 ﻿using Mailing.Abstractions;
 using Mailing.Infrastructure;
 using Mailing.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
@@ -18,18 +19,18 @@ namespace Mailing.Models;
 public sealed class EmailSendingScheduler
 {
     private readonly ILogger Logger;
-    private readonly IEmailSendingRepository EmailSendingRepository;
+    private readonly IServiceProvider ServiceProvider;
     private readonly MailingServiceSettings Settings;
 
     internal readonly ConcurrentBag<EmailSenderTrigger> ListenedTriggers;
 
     internal EmailSendingScheduler(
         ILogger logger,
-        IEmailSendingRepository sendingRepository,
+        IServiceProvider serviceProvider,
         MailingServiceSettings settings)
     {
         Logger = logger;
-        EmailSendingRepository = sendingRepository;
+        ServiceProvider = serviceProvider;
         Settings = settings;
 
         ListenedTriggers = new();
@@ -37,6 +38,11 @@ public sealed class EmailSendingScheduler
 
     public async Task ScheduleEmailSendingAsync(EmailSendingSchedule schedule)
     {
+        using IServiceScope serviceScope = ServiceProvider.CreateScope();
+
+        IEmailSendingRepository EmailSendingRepository = serviceScope.ServiceProvider
+            .GetRequiredService<IEmailSendingRepository>();
+
         // NOTE: сохранить в базу новое расписание рассылки
         await EmailSendingRepository.AddEmailSendingScheduleAsync(schedule);
 
@@ -49,6 +55,12 @@ public sealed class EmailSendingScheduler
 
     internal async Task RestoringStoragedSendingSchedulesAsync()
     {
+        using IServiceScope serviceScope = ServiceProvider.CreateScope();
+
+        IEmailSendingRepository EmailSendingRepository = serviceScope.ServiceProvider
+            .GetRequiredService<IEmailSendingRepository>();
+
+
         Logger.LogInformation("Запуск загрузки из хранилища ранее запланированных рассылок .");
         if (ListenedTriggers.IsEmpty is false)
         {

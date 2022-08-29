@@ -24,21 +24,21 @@ namespace Mailing;
 public sealed class MailingBackgroundService : BackgroundService, IMailingService
 {
     private readonly ILogger Logger;
-    private readonly IEmailSendingRepository EmailSendingRepository;
+    private readonly IServiceProvider ServiceProvider;
     private readonly MailingServiceSettings Settings;
 
     public MailingBackgroundService(
         ILogger<MailingBackgroundService> logger,
-        IEmailSendingRepository sendingRepository,
+        IServiceProvider serviceProvider,
         IOptions<MailingServiceSettings> settings)
     {
         Logger = logger;
-        EmailSendingRepository = sendingRepository;
+        ServiceProvider = serviceProvider;
         Settings = settings.Value;
 
         EmailSendingScheduler = new(
             Logger,
-            EmailSendingRepository,
+            ServiceProvider,
             Settings);
     }
 
