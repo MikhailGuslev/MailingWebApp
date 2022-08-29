@@ -1,5 +1,4 @@
-﻿using DataLayer;
-using Mailing.Abstractions;
+﻿using Mailing.Abstractions;
 using Mailing.Models;
 using Scriban;
 
@@ -19,7 +18,7 @@ public sealed class MessageFactory
 
     public MessageTemplate MessageTemplate { get; init; }
 
-    public async Task<Message> CreateMessageAsync(User recipient)
+    public async Task<Message> CreateMessageAsync(Recipient recipient)
     {
         if (CompiledTemplate is null)
         {
@@ -94,7 +93,7 @@ public sealed class MessageFactory
         }
 
         string renderedBody = await CompiledTemplate.Body.RenderAsync(model);
-        
+
         return renderedBody;
     }
 }

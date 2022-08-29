@@ -1,6 +1,4 @@
-﻿using DataLayer;
-
-namespace Mailing.Models;
+﻿namespace Mailing.Models;
 
 /// <summary>
 /// Данные рассылки
@@ -9,6 +7,6 @@ public sealed record class EmailSending
 {
     public int SendingId { get; init; }
     public string Name { get; init; } = string.Empty;
-    public IReadOnlyList<User> Recipients { get; init; } = new List<User>();
+    public IReadOnlyList<Recipient> Recipients { get; init; } = new List<Recipient>();
     public MessageTemplate MessageTemplate { get; init; } = new();
 }

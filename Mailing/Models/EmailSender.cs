@@ -1,5 +1,4 @@
-﻿using DataLayer;
-using Mailing.Infrastructure;
+﻿using Mailing.Infrastructure;
 using Mailing.Settings;
 using Microsoft.Extensions.Logging;
 using MimeKit;
@@ -42,7 +41,7 @@ public sealed record class EmailSender
         await smtpClient.ConnectAsync(Settings.SenderServer, Settings.SenderServerPort, false, stoppingToken);
         await smtpClient.AuthenticateAsync(Settings.SenderEmail, Settings.SenderEmailPassword, stoppingToken);
 
-        foreach (User recipient in Sending.Recipients)
+        foreach (Recipient recipient in Sending.Recipients)
         {
             MimeMessage emailMessage = await EmailMessageFactory
                 .CreateEmailMessageAsync(recipient);
@@ -55,7 +54,7 @@ public sealed record class EmailSender
         await smtpClient.DisconnectAsync(true);
     }
 
-    private void LogSendingSummary(User recipient, MimeMessage message)
+    private void LogSendingSummary(Recipient recipient, MimeMessage message)
     {
         string info = "Клиенту с id {userId} отправлено сообщение на тему {subject}";
         Logger.LogInformation(info, recipient.UserId, message.Subject);

@@ -1,5 +1,4 @@
-﻿using DataLayer;
-using Mailing.Enums;
+﻿using Mailing.Enums;
 using Mailing.Models;
 using MimeKit;
 
@@ -26,7 +25,7 @@ public sealed class EmailMessageFactory
     public string SenderEmail { get; init; }
     public MessageFactory MessageFactory { get; init; }
 
-    public async Task<MimeMessage> CreateEmailMessageAsync(User recipient)
+    public async Task<MimeMessage> CreateEmailMessageAsync(Recipient recipient)
     {
         Message message = await MessageFactory.CreateMessageAsync(recipient);
 
