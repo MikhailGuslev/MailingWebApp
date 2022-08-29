@@ -1,0 +1,20 @@
+﻿{
+  "general": {
+    "provider": "SQlite",
+    "connection": "Data Source=./storage.db",
+    "output": "./DataLayer/Entities",
+    "overwrite": true
+  },
+  "code": {
+    "namespace": "DataLayer.Entities"
+  },
+  "dataModel": {
+    "entity-class-name": {
+      "pluralization": "none"
+    },
+    "entity-context-property-name": {
+      "pluralization": "none"
+    }
+  }
+}
+// CMD: dotnet-linq2db scaffold -i ./DataLayer/database.json
