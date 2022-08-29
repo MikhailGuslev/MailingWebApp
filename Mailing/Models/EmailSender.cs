@@ -3,7 +3,6 @@ using Mailing.Infrastructure;
 using Mailing.Settings;
 using Microsoft.Extensions.Logging;
 using MimeKit;
-using System.Text;
 using MailKitSmtp = MailKit.Net.Smtp;
 
 namespace Mailing.Models;
@@ -22,46 +21,46 @@ public sealed record class EmailSender
     public EmailSender(
         ILogger logger,
         MailingServiceSettings settings,
-        User[] recipients,
-        EmailMessageFactory emailMessageFactory)
+        EmailSending sending)
     {
         Logger = logger;
-        Recipients = recipients;
-        EmailMessageFactory = emailMessageFactory;
         Settings = settings;
+        Sending = sending;
+
+        EmailMessageFactory = new(
+            Settings.SenderServer,
+            Settings.SenderEmail,
+            sending.MessageTemplate);
     }
 
-    public User[] Recipients { get; init; }
-    public EmailMessageFactory EmailMessageFactory { get; init; }
     public MailingServiceSettings Settings { get; init; }
+    public EmailSending Sending { get; init; }
+    public EmailMessageFactory EmailMessageFactory { get; init; }
 
     public async Task RunSendingAsync(CancellationToken stoppingToken)
     {
-        using MailKitSmtp.SmtpClient client = new();
+        Logger.LogInformation("Запуск рассылки {sending}", Sending);
 
-        await client.ConnectAsync(Settings.SenderServer, Settings.SenderServerPort, false, stoppingToken);
-        await client.AuthenticateAsync(Settings.SenderEmail, Settings.SenderEmailPassword, stoppingToken);
+        using MailKitSmtp.SmtpClient smtpClient = new();
+        await smtpClient.ConnectAsync(Settings.SenderServer, Settings.SenderServerPort, false, stoppingToken);
+        await smtpClient.AuthenticateAsync(Settings.SenderEmail, Settings.SenderEmailPassword, stoppingToken);
 
-        foreach (User recipient in Recipients)
+        foreach (User recipient in Sending.Recipients)
         {
-            MimeMessage emailMessage = await EmailMessageFactory.CreateEmailMessageAsync(recipient);
-            await client.SendAsync(emailMessage, stoppingToken);
+            MimeMessage emailMessage = await EmailMessageFactory
+                .CreateEmailMessageAsync(recipient);
+            await smtpClient.SendAsync(emailMessage, stoppingToken);
+
             LogSendingSummary(recipient, emailMessage);
             await Task.Yield();
         }
 
-        await client.DisconnectAsync(true);
+        await smtpClient.DisconnectAsync(true);
     }
 
     private void LogSendingSummary(User recipient, MimeMessage message)
     {
-        string info = new StringBuilder()
-            .Append("Пользователю ")
-            .Append(recipient.UserId)
-            .Append(" отправлено сообщение на тему")
-            .Append(message.Subject)
-            .ToString();
-
-        Logger.LogInformation(info);
+        string info = "Клиенту {userId} отправлено сообщение на тему {subject}";
+        Logger.LogInformation(info, recipient.UserId, message.Subject);
     }
 }
