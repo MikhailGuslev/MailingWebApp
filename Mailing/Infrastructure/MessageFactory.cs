@@ -69,7 +69,9 @@ public sealed class MessageFactory
             throw new MailingException(error);
         }
 
-        return await CompiledTemplate.Subject.RenderAsync(model.SubjectModel);
+        string renderedSubject = await CompiledTemplate.Subject.RenderAsync(model);
+
+        return renderedSubject;
     }
 
     private async Task<string> GetBody(IMessageModel? model)
@@ -91,6 +93,8 @@ public sealed class MessageFactory
             throw new MailingException(error);
         }
 
-        return await CompiledTemplate.Body.RenderAsync(model.BodyModel);
+        string renderedBody = await CompiledTemplate.Body.RenderAsync(model);
+        
+        return renderedBody;
     }
 }
