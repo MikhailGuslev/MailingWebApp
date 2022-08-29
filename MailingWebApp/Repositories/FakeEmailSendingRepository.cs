@@ -6,6 +6,8 @@ namespace MailingWebApp.Repositories;
 
 public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 {
+    private readonly FakeMessageModelProviderRepository fakeMessageModelProviderRepository = new();
+
     private const int FakeSize = 10;
 
     private readonly List<User> FakeUsers;
@@ -29,7 +31,9 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
                 new EmailSending
                 {
                     SendingId = i,
-                    MessageTemplate = GetFakeTemplate(i),
+                    MessageTemplate = (i % 2 == 0)
+                        ? GetDynamicFakeTemplate(i)
+                        : GetStaticFakeTemplate(i),
                     Name = $"FUN_SENDING_{i}",
                     Recipients = FakeUsers.GetRange(0, i)
                 })
@@ -66,16 +70,39 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         FakeSchedules.Add(schedule);
     }
 
-    private MessageTemplate GetFakeTemplate(int fakeId)
+    private MessageTemplate GetStaticFakeTemplate(int fakeId)
     {
         return new MessageTemplate
         {
             MessageTemplateId = fakeId,
-            Subject = $"SUBJECT_{fakeId}",
-            Body = "FAKE CONTENT",
+            Subject = $"STATIC SUBJECT_{fakeId}",
+            Body = "STATIC FAKE CONTENT",
             IsBodyStatic = true,
             IsSubjectStatic = true,
             ContentType = Mailing.Enums.MessageContentType.PlainText
+        };
+    }
+
+    private MessageTemplate GetDynamicFakeTemplate(int fakeId)
+    {
+        string fakeSubjectTemplate = @$"DYNAMIC SUBJECT_{fakeId}" + @"{{subject_model.value}}";
+        string fakeBodyTemplate = $"DYNAMIC FAKE CONTENT_{fakeId}" +
+@"{{ for item in body_model.items }}
+    😺 {{ item }}
+{{ end }}
+";
+
+        return new MessageTemplate
+        {
+            MessageTemplateId = fakeId,
+            Subject = fakeSubjectTemplate,
+            Body = fakeBodyTemplate,
+            IsBodyStatic = false,
+            IsSubjectStatic = false,
+            ContentType = Mailing.Enums.MessageContentType.PlainText,
+            ModelProvider = fakeMessageModelProviderRepository
+                .GetMessageModelProviderAsync("FAKE")
+                .Result
         };
     }
 }
