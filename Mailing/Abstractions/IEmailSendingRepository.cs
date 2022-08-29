@@ -4,7 +4,7 @@ namespace Mailing.Abstractions;
 
 public interface IEmailSendingRepository
 {
-    IReadOnlyList<EmailSending> GetSendings();
-    IReadOnlyList<EmailSendingSchedule> GetEmailSendingSchedules();
-    void AddEmailSendingSchedule(EmailSendingSchedule schedule);
+    Task<IReadOnlyList<EmailSending>> GetSendingsAsync();
+    Task<IReadOnlyList<EmailSendingSchedule>> GetEmailSendingSchedulesAsync();
+    Task AddEmailSendingScheduleAsync(EmailSendingSchedule schedule);
 }

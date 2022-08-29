@@ -2,8 +2,8 @@
 
 public interface IMessageModelProviderRepository
 {
-    IMessageModelProvider GetMessageModelProvider(Type providerType);
-    IMessageModelProvider GetMessageModelProvider(string providerTypeName);
+    Task<IMessageModelProvider> GetMessageModelProviderAsync(Type providerType);
+    Task<IMessageModelProvider> GetMessageModelProviderAsync(string providerTypeName);
 
-    void AddMessageModelProvider(IMessageModelProvider modelProvider);
+    Task AddMessageModelProviderAsync(IMessageModelProvider modelProvider);
 }

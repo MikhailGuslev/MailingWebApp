@@ -49,7 +49,7 @@ public sealed class MailingBackgroundService : BackgroundService, IMailingServic
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await EmailSendingScheduler.RestoringStoragedSendingSchedules();
+        await EmailSendingScheduler.RestoringStoragedSendingSchedulesAsync();
         await RunUpdatingTriggersAsync(stoppingToken);
     }
 

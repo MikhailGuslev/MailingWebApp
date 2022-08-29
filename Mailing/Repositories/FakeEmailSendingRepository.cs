@@ -48,18 +48,21 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         };
     }
 
-    public IReadOnlyList<EmailSending> GetSendings()
+    public async Task<IReadOnlyList<EmailSending>> GetSendingsAsync()
     {
+        await Task.CompletedTask;
         return FakeSendings;
     }
 
-    public IReadOnlyList<EmailSendingSchedule> GetEmailSendingSchedules()
+    public async Task<IReadOnlyList<EmailSendingSchedule>> GetEmailSendingSchedulesAsync()
     {
+        await Task.CompletedTask;
         return FakeSchedules;
     }
 
-    public void AddEmailSendingSchedule(EmailSendingSchedule schedule)
+    public async Task AddEmailSendingScheduleAsync(EmailSendingSchedule schedule)
     {
+        await Task.CompletedTask;
         FakeSchedules.Add(schedule);
     }
 

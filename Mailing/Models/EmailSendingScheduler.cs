@@ -36,10 +36,10 @@ public sealed class EmailSendingScheduler
         ListenedTriggers = new();
     }
 
-    public void ScheduleEmailSending(EmailSendingSchedule schedule)
+    public async Task ScheduleEmailSendingAsync(EmailSendingSchedule schedule)
     {
         // NOTE: сохранить в базу новое расписание рассылки
-        EmailSendingRepository.AddEmailSendingSchedule(schedule);
+        await EmailSendingRepository.AddEmailSendingScheduleAsync(schedule);
 
         // NOTE: создать добавить в список прослушиваемых новый активатор рассылки
         EmailSenderTrigger trigger = CreateNewSendingTrigger(schedule);
@@ -48,7 +48,7 @@ public sealed class EmailSendingScheduler
         Logger.LogInformation("Запланирована рассылка {schedule}", schedule);
     }
 
-    internal async Task RestoringStoragedSendingSchedules()
+    internal async Task RestoringStoragedSendingSchedulesAsync()
     {
         Logger.LogInformation("Запуск загрузки из хранилища ранее запланированных рассылок .");
         if (ListenedTriggers.IsEmpty is false)
@@ -60,7 +60,7 @@ public sealed class EmailSendingScheduler
         }
 
         // TODO: сделать методы всех репозиториев асинхронными
-        IReadOnlyList<EmailSendingSchedule> storagedSchedules = EmailSendingRepository.GetEmailSendingSchedules();
+        IReadOnlyList<EmailSendingSchedule> storagedSchedules = await EmailSendingRepository.GetEmailSendingSchedulesAsync();
 
         foreach (var schedule in storagedSchedules)
         {

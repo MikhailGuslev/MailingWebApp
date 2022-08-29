@@ -32,17 +32,19 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
         }
     }
 
-    public IMessageModelProvider GetMessageModelProvider(Type providerType)
+    public async Task<IMessageModelProvider> GetMessageModelProviderAsync(Type providerType)
     {
+        await Task.CompletedTask;
         return new FakeMessageModelProvider();
     }
 
-    public IMessageModelProvider GetMessageModelProvider(string providerTypeName)
+    public async Task<IMessageModelProvider> GetMessageModelProviderAsync(string providerTypeName)
     {
+        await Task.CompletedTask;
         return new FakeMessageModelProvider();
     }
 
-    public void AddMessageModelProvider(IMessageModelProvider modelProvider)
+    public async Task AddMessageModelProviderAsync(IMessageModelProvider modelProvider)
     {
         throw new NotImplementedException();
     }
