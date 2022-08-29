@@ -77,13 +77,7 @@ public sealed class EmailSendingScheduler
 
     private EmailSenderTrigger CreateNewSendingTrigger(EmailSendingSchedule schedule)
     {
-        string senderName = Settings.SenderServer;
-        string senderEmail = Settings.SenderEmail;
-        User[] recipients = schedule.EmailSending.Recipients.ToArray();
-        MessageTemplate template = schedule.EmailSending.MessageTemplate;
-
-        EmailMessageFactory emailMessageFactory = new(senderName, senderEmail, template);
-        EmailSender emailSender = new(Logger, Settings, recipients, emailMessageFactory);
+        EmailSender emailSender = new(Logger, Settings, schedule.EmailSending);
         EmailSenderTrigger newTrigger = new(emailSender, schedule);
 
         return newTrigger;
