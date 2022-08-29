@@ -35,7 +35,7 @@ public sealed record class EmailSender
 
     public async Task RunSendingAsync(CancellationToken stoppingToken)
     {
-        Logger.LogInformation("Запуск рассылки {sending}", new { Sending.SendingId, Sending.Name });
+        Logger.LogInformation("Запуск рассылки {sending}", new { Sending.EmailSendingId, Sending.Name });
 
         using MailKitSmtp.SmtpClient smtpClient = new();
         await smtpClient.ConnectAsync(Settings.SenderServer, Settings.SenderServerPort, false, stoppingToken);

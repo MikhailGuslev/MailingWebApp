@@ -5,7 +5,7 @@
 /// </summary>
 public sealed record class EmailSending
 {
-    public int SendingId { get; init; }
+    public int EmailSendingId { get; init; }
     public string Name { get; init; } = string.Empty;
     public IReadOnlyList<Recipient> Recipients { get; init; } = new List<Recipient>();
     public MessageTemplate MessageTemplate { get; init; } = new();
