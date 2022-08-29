@@ -1,5 +1,4 @@
-﻿using DataLayer;
-using Mailing.Abstractions;
+﻿using Mailing.Abstractions;
 using Mailing.Infrastructure;
 using Mailing.Settings;
 using Microsoft.Extensions.Logging;

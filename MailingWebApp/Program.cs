@@ -1,7 +1,7 @@
 using Mailing;
 using Mailing.Abstractions;
-using Mailing.Repositories;
 using Mailing.Settings;
+using MailingWebApp.Repositories;
 using NLog.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);

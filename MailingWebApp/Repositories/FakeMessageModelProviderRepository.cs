@@ -1,7 +1,7 @@
 ﻿using DataLayer;
 using Mailing.Abstractions;
 
-namespace Mailing.Repositories;
+namespace MailingWebApp.Repositories;
 
 public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRepository
 {

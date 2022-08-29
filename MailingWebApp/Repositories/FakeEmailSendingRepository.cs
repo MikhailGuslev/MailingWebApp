@@ -2,7 +2,7 @@
 using Mailing.Abstractions;
 using Mailing.Models;
 
-namespace Mailing.Repositories;
+namespace MailingWebApp.Repositories;
 
 public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 {
@@ -75,7 +75,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
             Body = "FAKE CONTENT",
             IsBodyStatic = true,
             IsSubjectStatic = true,
-            ContentType = Enums.MessageContentType.PlainText
+            ContentType = Mailing.Enums.MessageContentType.PlainText
         };
     }
 }
