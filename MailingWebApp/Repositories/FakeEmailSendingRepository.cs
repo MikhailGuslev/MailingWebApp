@@ -1,109 +1,110 @@
-﻿using Mailing.Abstractions;
+﻿using LinqToDB;
+using Mailing.Abstractions;
 using Mailing.Models;
-using OpenReceivingMeterReadingsPeriodModelProvider;
+using Dal = DataLayer.Entities;
 
 namespace MailingWebApp.Repositories;
 
 public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 {
-    private readonly FakeMessageModelProviderRepository fakeMessageModelProviderRepository = new();
+    private sealed record class RawEmailSending(
+        Dal.EmailSending Sending,
+        Dal.MessageTemplate MessageTemplate,
+        Dal.ModelProvider? ModelProvider);
 
-    private const int FakeSize = 10;
+    private readonly Dal.StorageDb Storage;
+    private readonly IMessageModelProviderRepository MessageModelProviderRepository;
 
-    private readonly List<Recipient> FakeUsers;
-    private readonly List<EmailSending> FakeSendings;
-    private readonly List<EmailSendingSchedule> FakeSchedules;
-
-    public FakeEmailSendingRepository()
+    public FakeEmailSendingRepository(
+        Dal.StorageDb storage,
+        IMessageModelProviderRepository modelProvidersRepositry)
     {
-        IEnumerable<int> faker = Enumerable.Range(1, FakeSize);
-
-        FakeUsers = faker
-            .Select(i => new Recipient
-            {
-                UserId = i,
-                Email = $"user_{i}@gmail.com"
-            })
-            .ToList();
-
-        FakeSendings = faker
-            .Select(i =>
-                new EmailSending
-                {
-                    SendingId = i,
-                    MessageTemplate = (i % 2 == 0)
-                        ? GetDynamicFakeTemplate(i)
-                        : GetStaticFakeTemplate(i),
-                    Name = $"FUN_SENDING_{i}",
-                    Recipients = FakeUsers.GetRange(0, i)
-                })
-            .ToList();
-
-        FakeSchedules = new()
-        {
-            new EmailSendingSchedule
-            {
-                EmailSendingScheduleId = 0,
-                EmailSending = FakeSendings[7],
-                ActivationTimePoint = DateTime.Now.AddDays(-1),
-                DeactivationTimePoint = DateTime.Now.AddSeconds(10),
-                ActivationInterval = TimeSpan.FromSeconds(2)
-            }
-        };
+        Storage = storage;
+        MessageModelProviderRepository = modelProvidersRepositry;
     }
 
     public async Task<IReadOnlyList<EmailSending>> GetSendingsAsync()
     {
-        await Task.CompletedTask;
-        return FakeSendings;
+        IReadOnlyList<RawEmailSending> rawSendings = await Storage.EmailSending
+            .Join(Storage.MessageTemplate,
+                s => s.MessageTemplateId,
+                t => t.MessageTemplateId,
+                (s, t) => new { Sending = s, Template = t })
+            .Join(Storage.ModelProvider,
+                a => a.Template.ModelProviderId,
+                b => b.ModelProviderId,
+                (a, b) =>
+                    new RawEmailSending(a.Sending, a.Template, b))
+            .ToListAsync();
+
+        // TODO: get all modelproviders
+
+        // TODO: get all users
+
+        IEnumerable<Task<EmailSending>> tasks = rawSendings
+            .Select(async x => new EmailSending
+            {
+                EmailSendingId = (int)x.Sending.SendingId,
+                Name = x.Sending.Name,
+                MessageTemplate = new()
+                {
+                    MessageTemplateId = (int)x.MessageTemplate.MessageTemplateId,
+                    Subject = x.MessageTemplate.Subject,
+                    Body = x.MessageTemplate.Body,
+                    ContentType = x.MessageTemplate.ContentType switch
+                    {
+                        "PlainText" => Mailing.Enums.MessageContentType.PlainText,
+                        "Html" => Mailing.Enums.MessageContentType.Html,
+                        _ => throw new ArgumentException(
+                            "ContentType задан неверно {type}",
+                            x.MessageTemplate.ContentType)
+                    },
+                    IsBodyStatic = x.MessageTemplate.IsBodyStatic,
+                    IsSubjectStatic = x.MessageTemplate.IsSubjectStatic,
+                    ModelProvider = x.ModelProvider is null
+                        ? null
+                        : await MessageModelProviderRepository
+                            .GetMessageModelProviderAsync(x.ModelProvider.ModelProviderTypeName)
+                },
+                Recipients = GetRecipietsFromString(x.Sending.Recipients)
+            });
+
+        IEnumerable<EmailSending> sendings = await Task.WhenAll(tasks);
+
+        return sendings.ToList();
+
+        List<Recipient> GetRecipietsFromString(string recipientsAsString)
+        {
+            // TODO: implement
+            return new List<Recipient>();
+        }
     }
 
     public async Task<IReadOnlyList<EmailSendingSchedule>> GetEmailSendingSchedulesAsync()
     {
-        await Task.CompletedTask;
-        return FakeSchedules;
+
+
+        IReadOnlyList<EmailSending> sendings = await GetSendingsAsync();
+
+        List<EmailSendingSchedule> schedules = await Storage.EmailSendingSchedule
+            .Join(sendings,
+                e => e.EmailSendingId,
+                s => s.EmailSendingId,
+                (e, s) => new EmailSendingSchedule
+                {
+                    EmailSendingScheduleId = (int)e.EmailSendingScheduleId,
+                    EmailSending = s,
+                    ActivationTimePoint = e.ActivationTimePoint,
+                    DeactivationTimePoint = e.DeactivationTimePoint,
+                    ActivationInterval = TimeSpan.FromTicks(e.ActivationInterval)
+                })
+            .ToListAsync();
+
+        return schedules;
     }
 
     public async Task AddEmailSendingScheduleAsync(EmailSendingSchedule schedule)
     {
-        await Task.CompletedTask;
-        FakeSchedules.Add(schedule);
-    }
-
-    private MessageTemplate GetStaticFakeTemplate(int fakeId)
-    {
-        return new MessageTemplate
-        {
-            MessageTemplateId = fakeId,
-            Subject = $"STATIC SUBJECT_{fakeId}",
-            Body = "STATIC FAKE CONTENT",
-            IsBodyStatic = true,
-            IsSubjectStatic = true,
-            ContentType = Mailing.Enums.MessageContentType.PlainText
-        };
-    }
-
-    private MessageTemplate GetDynamicFakeTemplate(int fakeId)
-    {
-        string fakeSubjectTemplate = @$"[FAKE] Открыт приём показаний ПУ";
-        string fakeBodyTemplate =
-@"{{ for item in body_model.meter_readings_period_details }}
-    * Поставщик {{ item.service_provider_name }} 
-        Услуга {{ item.provided_service_name }}  
-        ПУ {{item.metering_device}} 
-        с {{item.start_taking_readings}} по {{item.end_taking_readings}}
-{{ end }}
-";
-
-        return new MessageTemplate
-        {
-            MessageTemplateId = fakeId,
-            Subject = fakeSubjectTemplate,
-            Body = fakeBodyTemplate,
-            IsBodyStatic = false,
-            IsSubjectStatic = false,
-            ContentType = Mailing.Enums.MessageContentType.PlainText,
-            ModelProvider = new FakeMessageModelProvider()
-        };
+        throw new NotImplementedException();
     }
 }
