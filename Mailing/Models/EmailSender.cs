@@ -18,10 +18,7 @@ public sealed record class EmailSender
     //       - сборка поставщиков моделей выгружена
     //       - рассылка отменена
 
-    public EmailSender(
-        ILogger logger,
-        MailingServiceSettings settings,
-        EmailSending sending)
+    public EmailSender(ILogger logger, MailingServiceSettings settings, EmailSending sending)
     {
         Logger = logger;
         Settings = settings;

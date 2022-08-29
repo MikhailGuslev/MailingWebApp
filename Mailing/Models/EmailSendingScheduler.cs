@@ -44,10 +44,13 @@ public sealed class EmailSendingScheduler
         // NOTE: создать добавить в список прослушиваемых новый активатор рассылки
         EmailSenderTrigger trigger = CreateNewSendingTrigger(schedule);
         ListenedTriggers.Add(trigger);
+
+        Logger.LogInformation("Запланирована рассылка {schedule}", schedule);
     }
 
     internal async Task RestoringStoragedSendingSchedules()
     {
+        Logger.LogInformation("Запуск загрузки из хранилища ранее запланированных рассылок .");
         if (ListenedTriggers.IsEmpty is false)
         {
             string error =
@@ -66,7 +69,9 @@ public sealed class EmailSendingScheduler
             ListenedTriggers.Add(trigger);
         }
 
-        Logger.LogInformation("Восстановлено из хранилища {total} рассылок", ListenedTriggers.Count);
+        Logger.LogInformation(
+            "Загрузка ранее запланированных рассылок завершена. Кол-во загруженных елементов {total}",
+            ListenedTriggers.Count);
 
         await Task.CompletedTask;
     }

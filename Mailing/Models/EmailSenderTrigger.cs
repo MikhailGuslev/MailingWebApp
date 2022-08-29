@@ -1,7 +1,7 @@
 ﻿namespace Mailing.Models;
 
 /// <summary>
-/// Триггер, запускающий рассылку
+/// Триггер, запускающий рассылку в соответствии с расписанием
 /// </summary>
 public sealed record class EmailSenderTrigger
 {

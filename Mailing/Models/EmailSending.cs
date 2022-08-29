@@ -2,6 +2,9 @@
 
 namespace Mailing.Models;
 
+/// <summary>
+/// Данные рассылки
+/// </summary>
 public sealed record class EmailSending
 {
     public int SendingId { get; init; }

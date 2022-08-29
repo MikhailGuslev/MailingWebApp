@@ -5,6 +5,9 @@ using MimeKit;
 
 namespace Mailing.Infrastructure;
 
+/// <summary>
+/// Фабрика экземпляров MimeMessage - объектов-сообщений для smtp клиента 
+/// </summary>
 public sealed class EmailMessageFactory
 {
     private readonly MailboxAddress SenderAddress;

@@ -49,14 +49,13 @@ public sealed class MailingBackgroundService : BackgroundService, IMailingServic
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Logger.LogInformation("MailingService running");
-
         await EmailSendingScheduler.RestoringStoragedSendingSchedules();
         await RunUpdatingTriggersAsync(stoppingToken);
     }
 
     private async Task RunUpdatingTriggersAsync(CancellationToken stoppingToken)
     {
+        Logger.LogInformation("Запущен цикл обновления состояния рассылок");
         while (stoppingToken.IsCancellationRequested is false)
         {
             await UpdateTriggersAsync(stoppingToken);

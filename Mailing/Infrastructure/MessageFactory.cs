@@ -5,6 +5,9 @@ using Scriban;
 
 namespace Mailing.Infrastructure;
 
+/// <summary>
+/// Фабрика экземпляров типа Message - объектов с общими данными сообщений любого типа
+/// </summary>
 public sealed class MessageFactory
 {
     private CompiledMessageTemplate? CompiledTemplate = null;

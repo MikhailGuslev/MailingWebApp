@@ -8,6 +8,10 @@ public sealed record MessageTemplate
     public int MessageTemplateId { get; init; }
     public string Subject { get; init; } = string.Empty;
     public string Body { get; init; } = string.Empty;
+    /// <summary>
+    /// Модуль, отвечающий за предоставление модели данных, 
+    /// подставляемых в шаблон письмо
+    /// </summary>
     public IMessageModelProvider? ModelProvider { get; init; } = null;
     public MessageContentType ContentType { get; init; } = MessageContentType.PlainText;
     /// <summary>
