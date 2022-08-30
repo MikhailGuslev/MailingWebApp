@@ -21,4 +21,8 @@
     <ProjectReference Include="..\PluginManager\PluginManager.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
