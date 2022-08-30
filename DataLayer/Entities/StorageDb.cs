@@ -35,11 +35,12 @@ namespace DataLayer.Entities
 
 		partial void InitDataContext();
 
-		public ITable<User>                 User                 => this.GetTable<User>();
-		public ITable<Plugin>               Plugin               => this.GetTable<Plugin>();
-		public ITable<ModelProvider>        ModelProvider        => this.GetTable<ModelProvider>();
-		public ITable<MessageTemplate>      MessageTemplate      => this.GetTable<MessageTemplate>();
-		public ITable<EmailSending>         EmailSending         => this.GetTable<EmailSending>();
-		public ITable<EmailSendingSchedule> EmailSendingSchedule => this.GetTable<EmailSendingSchedule>();
+		public ITable<MeterReadingsPeriodDetails> MeterReadingsPeriodDetails => this.GetTable<MeterReadingsPeriodDetails>();
+		public ITable<User>                       User                       => this.GetTable<User>();
+		public ITable<Plugin>                     Plugin                     => this.GetTable<Plugin>();
+		public ITable<ModelProvider>              ModelProvider              => this.GetTable<ModelProvider>();
+		public ITable<MessageTemplate>            MessageTemplate            => this.GetTable<MessageTemplate>();
+		public ITable<EmailSending>               EmailSending               => this.GetTable<EmailSending>();
+		public ITable<EmailSendingSchedule>       EmailSendingSchedule       => this.GetTable<EmailSendingSchedule>();
 	}
 }

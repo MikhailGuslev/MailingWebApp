@@ -1,4 +1,15 @@
-﻿create table 'User'
+﻿create table MeterReadingsPeriodDetails (
+    MeterReadingsPeriodDetailsId  integer  not null,
+    ProvidedServiceName           text     not null,
+    ServiceProviderName           text     not null,
+    MeteringDevice                text     not null,
+    StartTakingReadings           datetime not null,
+    EndTakingReadings             datetime not null,
+
+    UserId                        integer not null
+);
+
+create table 'User'
 (
     UserId integer not null,
     Email text not null
