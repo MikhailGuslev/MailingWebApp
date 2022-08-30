@@ -14,13 +14,15 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 
     private readonly Dal.StorageDb Storage;
     private readonly IMessageModelProviderRepository MessageModelProviderRepository;
-
+    private readonly FakeRecipientRepository FakeRecipientRepository;
     public FakeEmailSendingRepository(
         Dal.StorageDb storage,
-        IMessageModelProviderRepository modelProvidersRepositry)
+        IMessageModelProviderRepository modelProvidersRepositry,
+        FakeRecipientRepository fakeRecipientRepository)
     {
         Storage = storage;
         MessageModelProviderRepository = modelProvidersRepositry;
+        FakeRecipientRepository = fakeRecipientRepository;
     }
 
     public async Task<IReadOnlyList<EmailSending>> GetSendingsAsync()
@@ -66,39 +68,35 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
                         : await MessageModelProviderRepository
                             .GetMessageModelProviderAsync(x.ModelProvider.ModelProviderTypeName)
                 },
-                Recipients = GetRecipietsFromString(x.Sending.Recipients)
+                Recipients = await FakeRecipientRepository
+                    .GetRecipientsFromStringAsync(x.Sending.Recipients)
             });
 
         IEnumerable<EmailSending> sendings = await Task.WhenAll(tasks);
 
         return sendings.ToList();
-
-        List<Recipient> GetRecipietsFromString(string recipientsAsString)
-        {
-            // TODO: implement
-            return new List<Recipient>();
-        }
     }
 
     public async Task<IReadOnlyList<EmailSendingSchedule>> GetEmailSendingSchedulesAsync()
     {
-
-
         IReadOnlyList<EmailSending> sendings = await GetSendingsAsync();
 
-        List<EmailSendingSchedule> schedules = await Storage.EmailSendingSchedule
-            .Join(sendings,
-                e => e.EmailSendingId,
-                s => s.EmailSendingId,
-                (e, s) => new EmailSendingSchedule
-                {
-                    EmailSendingScheduleId = (int)e.EmailSendingScheduleId,
-                    EmailSending = s,
-                    ActivationTimePoint = e.ActivationTimePoint,
-                    DeactivationTimePoint = e.DeactivationTimePoint,
-                    ActivationInterval = TimeSpan.FromTicks(e.ActivationInterval)
-                })
+        List<Dal.EmailSendingSchedule> rawSchedules = await Storage.EmailSendingSchedule
             .ToListAsync();
+
+        List<EmailSendingSchedule> schedules = rawSchedules
+        .Join(sendings,
+            e => e.EmailSendingId,
+            s => s.EmailSendingId,
+            (e, s) => new EmailSendingSchedule
+            {
+                EmailSendingScheduleId = (int)e.EmailSendingScheduleId,
+                EmailSending = s,
+                ActivationTimePoint = e.ActivationTimePoint,
+                DeactivationTimePoint = e.DeactivationTimePoint,
+                ActivationInterval = TimeSpan.FromTicks(e.ActivationInterval)
+            })
+        .ToList();
 
         return schedules;
     }
