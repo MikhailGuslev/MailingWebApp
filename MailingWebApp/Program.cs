@@ -1,6 +1,3 @@
-using DataLayer.Entities;
-using LinqToDB.AspNet;
-using LinqToDB.Configuration;
 using Mailing;
 using Mailing.Settings;
 using MailingWebApp.Infrastructure;
@@ -19,15 +16,8 @@ builder.Services
     .AddOptions<MailingServiceSettings>()
     .BindConfiguration(nameof(MailingServiceSettings));
 
-string connectStr = builder.Configuration
-    .GetConnectionString(nameof(StorageDb));
-
 builder.Services
-    .AddLinqToDBContext<StorageDb>((config, options) =>
-        options.UseSQLite(connectStr)
-    );
-
-builder.Services
+    .AddStorageContext()
     .AddScopedRepositories()
     .AddHostedService<StorageInitializerHostedService>()
     .AddHostedService<MailingBackgroundService>();
