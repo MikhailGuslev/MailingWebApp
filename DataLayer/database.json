@@ -1,7 +1,7 @@
 ﻿{
   "general": {
     "provider": "SQlite",
-    "connection": "Data Source=./storage.db",
+    "connection": "Data Source=./MailingWebApp/bin/Debug/storage.db",
     "output": "./DataLayer/Entities",
     "overwrite": true
   },
@@ -17,4 +17,4 @@
     }
   }
 }
-// CMD: dotnet-linq2db scaffold -i ./DataLayer/database.json
+// CMD (from root MailingWebApp solution DIR ): dotnet-linq2db scaffold -i ./DataLayer/database.json
