@@ -2,6 +2,7 @@ using Mailing;
 using Mailing.Settings;
 using MailingWebApp.Infrastructure;
 using NLog.Extensions.Logging;
+using PluginManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services
 builder.Services
     .AddStorageContext()
     .AddScopedRepositories()
+    .AddSingleton<PluginService>()
     .AddHostedService<StorageInitializerHostedService>()
     .AddHostedService<MailingBackgroundService>();
 
