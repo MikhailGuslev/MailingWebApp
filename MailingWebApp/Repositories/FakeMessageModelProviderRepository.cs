@@ -1,16 +1,16 @@
 ﻿using DataLayer.Entities;
 using LinqToDB;
 using Mailing.Abstractions;
-using PluginManager;
+using PluginManager.Abstractions;
 
 namespace MailingWebApp.Repositories;
 
 public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRepository
 {
     private readonly StorageDb Storage;
-    private readonly PluginService PluginService;
+    private readonly IPluginService PluginService;
 
-    public FakeMessageModelProviderRepository(StorageDb storage, PluginService pluginService)
+    public FakeMessageModelProviderRepository(StorageDb storage, IPluginService pluginService)
     {
         Storage = storage;
         PluginService = pluginService;
@@ -21,20 +21,17 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
         throw new NotImplementedException();
     }
 
-    public async Task<IMessageModelProvider> GetMessageModelProviderAsync(string providerTypeName)
+    public async Task<IMessageModelProvider?> GetMessageModelProviderAsync(string providerTypeName)
     {
         ModelProvider? modelProviderDetails = await Storage.ModelProvider
             .FirstOrDefaultAsync(x => x.ModelProviderTypeName == providerTypeName);
 
-        if (modelProviderDetails is null)
-        {
-            return null;
-        }
-        IMessageModelProvider? instance = null;
-
-        (bool success, instance) = await PluginService.TryGetMessageModelProviderInstance(
-            modelProviderDetails.ModelProviderTypeName,
-            (int)modelProviderDetails.PluginId);
+        IMessageModelProvider? instance = modelProviderDetails is not null
+            ? await PluginService.GetInstanceAsync(
+                modelProviderDetails.ModelProviderTypeName,
+                (int)modelProviderDetails.PluginId,
+                typeof(IMessageModelProvider)) as IMessageModelProvider
+            : null;
 
         return instance;
     }
