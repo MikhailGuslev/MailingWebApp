@@ -39,6 +39,7 @@ public sealed class StorageInitializerHostedService : IHostedService
             .GetRequiredService<StorageDb>();
 
         await UserInitialize(storage);
+        await MeterReadingsPeriodDetailsInitialize(storage);
         await PluginInitialize(storage);
         await ModelProviderInititalize(storage);
         await MessageTemplateInitialize(storage);
