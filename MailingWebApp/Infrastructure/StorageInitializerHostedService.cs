@@ -64,6 +64,103 @@ public sealed class StorageInitializerHostedService : IHostedService
         await storage.BulkCopyAsync(entities).TryAsync();
     }
 
+    private async Task MeterReadingsPeriodDetailsInitialize(StorageDb storage)
+    {
+        List<MeterReadingsPeriodDetails> entities = new()
+        {
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО Зима близко",
+                ServiceProviderName = "Горячее водоснабжение",
+                MeteringDevice = "qwerty",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 1,
+            },
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО Энергия",
+                ServiceProviderName = "Электроэнергия",
+                MeteringDevice = "asdfg",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 1,
+            },
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО МечтыСбываются",
+                ServiceProviderName = "Газ",
+                MeteringDevice = "zxcvb",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 1,
+            },
+
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО Зима близко",
+                ServiceProviderName = "Горячее водоснабжение",
+                MeteringDevice = "fghfh",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 2,
+            },
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО Энергия",
+                ServiceProviderName = "Электроэнергия",
+                MeteringDevice = "fghfgh",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 2,
+            },
+
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО МечтыСбываются",
+                ServiceProviderName = "Газ",
+                MeteringDevice = "zxcvb",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 3,
+            },
+
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО МечтыСбываются",
+                ServiceProviderName = "Газ",
+                MeteringDevice = "zxcvb",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 4,
+            },
+
+            new()
+            {
+                MeterReadingsPeriodDetailsId = 1,
+                ProvidedServiceName = "ООО МечтыСбываются",
+                ServiceProviderName = "Газ",
+                MeteringDevice = "zxcvb",
+                StartTakingReadings = DateTime.Now,
+                EndTakingReadings = DateTime.Now.AddDays(3),
+                UserId = 5,
+            },
+
+        };
+
+        await storage.DropTableAsync<MeterReadingsPeriodDetails>().TryAsync();
+        await storage.CreateTableAsync<MeterReadingsPeriodDetails>().TryAsync();
+
+        await storage.BulkCopyAsync(entities).TryAsync();
+    }
+
     private async Task PluginInitialize(StorageDb storage)
     {
 
