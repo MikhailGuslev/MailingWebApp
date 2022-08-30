@@ -31,7 +31,7 @@ public sealed class FakePluginRepository : IPluginRepository
     public async Task<Plugin> GetPluginAsync(int pluginId)
     {
         Dal.Plugin plugin = await Storage.Plugin
-            .FirstAsync(x => x.PluginId == pluginId);
+            .FirstAsync(x => (int)x.PluginId == pluginId);
 
         return MapToModel(plugin);
     }

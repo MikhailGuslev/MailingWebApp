@@ -21,6 +21,7 @@ public sealed class FakeRecipientRepository
             .Select(x => new Recipient { UserId = x.UserId, Email = x.Email })
             .ToList();
     }
+
     public async Task<IReadOnlyList<Recipient>> GetRecipientsFromStringAsync(string recipientIdsAsString)
     {
         long[] ids = recipientIdsAsString

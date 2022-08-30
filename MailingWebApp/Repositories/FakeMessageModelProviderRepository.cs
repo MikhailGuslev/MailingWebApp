@@ -1,47 +1,42 @@
-﻿using Mailing.Abstractions;
-using Mailing.Models;
+﻿using DataLayer.Entities;
+using LinqToDB;
+using Mailing.Abstractions;
+using PluginManager;
 
 namespace MailingWebApp.Repositories;
 
 public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRepository
 {
-    private sealed record class FakeMessageSubjectModel : IMessageSubjectModel
+    private readonly StorageDb Storage;
+    private readonly PluginService PluginService;
+
+    public FakeMessageModelProviderRepository(StorageDb storage, PluginService pluginService)
     {
-        public string Value => "FFFFFFFFFFFFFF";
-    }
-
-    private sealed record class FakeMessageBodyModel : IMessageBodyModel
-    {
-        public List<string> Items => new() { "qwerty", "asdfg", "zxcvb" };
-    }
-
-    private sealed record class FakeMessageModel : IMessageModel
-    {
-        public IMessageSubjectModel? SubjectModel => new FakeMessageSubjectModel();
-
-        public IMessageBodyModel? BodyModel => new FakeMessageBodyModel();
-    }
-
-    private sealed record class FakeMessageModelProvider : IMessageModelProvider
-    {
-        public async Task<IMessageModel> GetModelAsync(Recipient recipient)
-        {
-            await Task.CompletedTask;
-
-            return new FakeMessageModel();
-        }
+        Storage = storage;
+        PluginService = pluginService;
     }
 
     public async Task<IMessageModelProvider> GetMessageModelProviderAsync(Type providerType)
     {
-        await Task.CompletedTask;
-        return new FakeMessageModelProvider();
+        throw new NotImplementedException();
     }
 
     public async Task<IMessageModelProvider> GetMessageModelProviderAsync(string providerTypeName)
     {
-        await Task.CompletedTask;
-        return new FakeMessageModelProvider();
+        ModelProvider? modelProviderDetails = await Storage.ModelProvider
+            .FirstOrDefaultAsync(x => x.ModelProviderTypeName == providerTypeName);
+
+        if (modelProviderDetails is null)
+        {
+            return null;
+        }
+        IMessageModelProvider? instance = null;
+
+        (bool success, instance) = await PluginService.TryGetMessageModelProviderInstance(
+            modelProviderDetails.ModelProviderTypeName,
+            (int)modelProviderDetails.PluginId);
+
+        return instance;
     }
 
     public async Task AddMessageModelProviderAsync(IMessageModelProvider modelProvider)
