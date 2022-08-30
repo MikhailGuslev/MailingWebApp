@@ -3,6 +3,7 @@ using LinqToDB.AspNet;
 using LinqToDB.Configuration;
 using Mailing.Abstractions;
 using MailingWebApp.Repositories;
+using PluginManager.Abstractions;
 
 namespace MailingWebApp.Infrastructure;
 
@@ -27,6 +28,8 @@ public static class ServiceCollectionExtensions
         services
             .AddScoped<IMessageModelProviderRepository, FakeMessageModelProviderRepository>()
             .AddScoped<IEmailSendingRepository, FakeEmailSendingRepository>()
+            .AddScoped<IPluginRepository, FakePluginRepository>()
+            .AddScoped<FakeMessageTemplateRepository>()
             .AddScoped<FakeUserRepository>()
             .AddScoped<FakeRecipientRepository>();
 
