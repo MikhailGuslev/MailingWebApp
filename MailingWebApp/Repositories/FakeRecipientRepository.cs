@@ -22,20 +22,25 @@ public sealed class FakeRecipientRepository
             .ToList();
     }
 
-    public async Task<IReadOnlyList<Recipient>> GetRecipientsFromStringAsync(string recipientIdsAsString)
+    public async Task<IReadOnlyList<Recipient>> GetRecipientsAsync(int[] recipientIds)
     {
-        long[] ids = recipientIdsAsString
-            .Split(Separator)
-            .Select(x => long.TryParse(x, out long value) ? value : default)
-            .Where(x => x != default)
-            .ToArray();
-
         IReadOnlyList<DataLayer.Entities.User> users = await UserRepository
             .GetAllUsersAsync();
 
         return users
-            .Where(x => ids.Contains(x.UserId))
+            .Where(x => recipientIds.Contains((int)x.UserId))
             .Select(x => new Recipient { UserId = x.UserId, Email = x.Email })
             .ToList();
+    }
+
+    public async Task<IReadOnlyList<Recipient>> GetRecipientsByStringAsync(string recipientIdsAsString)
+    {
+        int[] ids = recipientIdsAsString
+            .Split(Separator)
+            .Select(x => int.TryParse(x, out int value) ? value : default)
+            .Where(x => x != default)
+            .ToArray();
+
+        return await GetRecipientsAsync(ids);
     }
 }

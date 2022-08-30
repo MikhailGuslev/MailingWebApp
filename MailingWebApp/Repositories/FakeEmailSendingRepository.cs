@@ -69,7 +69,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
                             .GetMessageModelProviderAsync(x.ModelProvider.ModelProviderTypeName)
                 },
                 Recipients = await FakeRecipientRepository
-                    .GetRecipientsFromStringAsync(x.Sending.Recipients)
+                    .GetRecipientsByStringAsync(x.Sending.Recipients)
             });
 
         IEnumerable<EmailSending> sendings = await Task.WhenAll(tasks);
