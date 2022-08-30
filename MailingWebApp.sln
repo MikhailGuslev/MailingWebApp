@@ -13,14 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PluginManager", "PluginMana
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{0E1FE74B-C423-4D93-9C2A-392B9B2A1027}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenReceivingMeterReadingsPeriodModelProvider", "OpenReceivingMeterReadingsPeriodModelProvider\OpenReceivingMeterReadingsPeriodModelProvider.csproj", "{6A3FFEF6-ABBD-4687-AED1-39E73A48E310}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenReceivingMeterReadingsPeriodModelProvider", "OpenReceivingMeterReadingsPeriodModelProvider\OpenReceivingMeterReadingsPeriodModelProvider.csproj", "{6A3FFEF6-ABBD-4687-AED1-39E73A48E310}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MessageModelProviders", "MessageModelProviders", "{F00FFF5B-6ACE-4D05-BBD0-6F326E57AF44}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{3B6F65FF-33C3-4EC6-983E-B1BC7E897BCE}"
-	ProjectSection(SolutionItems) = preProject
-		storage.db = storage.db
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Migrations", "Migrations", "{73AA9EB5-112C-456D-B833-1C9295805731}"
 	ProjectSection(SolutionItems) = preProject
