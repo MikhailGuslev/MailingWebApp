@@ -4,7 +4,7 @@ namespace PluginManager.Abstractions;
 
 public interface IPluginRepository
 {
-    Plugin GetPlugin(int pluginId);
-    IReadOnlyList<Plugin> GetPlugins();
-    void AddPlugin(Plugin plugin);
+    Task<Plugin> GetPluginAsync(int pluginId);
+    Task<IReadOnlyList<Plugin>> GetAllPluginsAsync();
+    Task AddPluginAsync(Plugin plugin);
 }
