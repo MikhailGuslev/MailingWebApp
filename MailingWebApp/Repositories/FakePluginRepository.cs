@@ -14,38 +14,52 @@ public sealed class FakePluginRepository : IPluginRepository
         Storage = storage;
     }
 
+    public async Task<IReadOnlyList<Plugin>> GetAllPluginsAsync()
+    {
+        return await Storage.Plugin
+            .Select(x => new Plugin
+            {
+                PluginId = (int)x.PluginId,
+                Name = x.Name,
+                Comment = x.Comment,
+                Data = x.Data,
+                CreatedDate = x.CreatedDate,
+                UpdatedDate = x.UpdatedDate,
+            })
+            .ToListAsync();
+    }
+
+    public async Task<PluginInformation?> GetPluginInformationAsync(int pluginId)
+    {
+        return await Storage.Plugin
+            .Select(x => new PluginInformation
+            {
+                PluginId = (int)x.PluginId,
+                Name = x.Name,
+                Comment = x.Comment,
+                CreatedDate = x.CreatedDate,
+                UpdatedDate = x.UpdatedDate,
+            })
+            .FirstOrDefaultAsync(x => x.PluginId == pluginId);
+    }
+
+    public async Task<Plugin?> GetPluginAsync(int pluginId)
+    {
+        return await Storage.Plugin
+            .Select(x => new Plugin
+            {
+                PluginId = (int)x.PluginId,
+                Name = x.Name,
+                Comment = x.Comment,
+                Data = x.Data,
+                CreatedDate = x.CreatedDate,
+                UpdatedDate = x.UpdatedDate,
+            })
+            .FirstOrDefaultAsync(x => (int)x.PluginId == pluginId);
+    }
+
     public async Task AddPluginAsync(Plugin plugin)
     {
         throw new NotImplementedException();
-    }
-
-    public async Task<IReadOnlyList<Plugin>> GetAllPluginsAsync()
-    {
-        List<Plugin> plugins = await Storage.Plugin
-            .Select(x => MapToModel(x))
-            .ToListAsync();
-
-        return plugins;
-    }
-
-    public async Task<Plugin> GetPluginAsync(int pluginId)
-    {
-        Dal.Plugin plugin = await Storage.Plugin
-            .FirstAsync(x => (int)x.PluginId == pluginId);
-
-        return MapToModel(plugin);
-    }
-
-    private Plugin MapToModel(Dal.Plugin original)
-    {
-        return new Plugin
-        {
-            PluginId = (int)original.PluginId,
-            Name = original.Name,
-            Comment = original.Comment,
-            Data = original.Data,
-            CreatedDate = original.CreatedDate,
-            UpdatedDate = original.UpdatedDate,
-        };
     }
 }
