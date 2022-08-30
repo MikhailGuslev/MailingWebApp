@@ -1,4 +1,5 @@
 ﻿using LinqToDB;
+using LinqToDB.Configuration;
 using Mailing.Abstractions;
 using Mailing.Models;
 using OpenReceivingMeterReadingsPeriodModelProvider.Models;
@@ -8,9 +9,18 @@ namespace OpenReceivingMeterReadingsPeriodModelProvider;
 
 public class FakeMessageModelProvider : IMessageModelProvider
 {
+    private readonly LinqToDBConnectionOptions<Dal.StorageDb> ConnectionOptions;
+
+    public FakeMessageModelProvider()
+    {
+        ConnectionOptions = new LinqToDBConnectionOptionsBuilder()
+            .UseSQLite("Data Source=./bin/Debug/storage.db")
+            .Build<Dal.StorageDb>();
+    }
+
     public async Task<IMessageModel> GetModelAsync(Recipient recipient)
     {
-        using Dal.StorageDb storage = new("Data Source=./bin/Debug/storage.db");
+        using Dal.StorageDb storage = new(ConnectionOptions);
 
         MeterReadingsPeriodDetails[] fakeDetails = await storage.MeterReadingsPeriodDetails
             .Where(x => x.UserId == recipient.UserId)
