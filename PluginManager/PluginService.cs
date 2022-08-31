@@ -39,7 +39,7 @@ public sealed class PluginService : IPluginService
             ? await GetAssembly(pluginInfo, pluginRepository)
             : null;
         Type? type = assembly is not null ? GetType(options.TypeName, assembly, options.InterfaceType) : null;
-        object? instance = type is not null ? CreateInstance(type) : null;
+        object? instance = type is not null ? CreateInstance(type, options.ConstructorArgumets) : null;
 
         info = "Экземпляр типа {type} из плагина {pluginId}" +
             instance is not null ? " извлечен " : " не извлечен ";
@@ -144,13 +144,13 @@ public sealed class PluginService : IPluginService
         return type;
     }
 
-    private object? CreateInstance(Type type)
+    private object? CreateInstance(Type type, object[] args)
     {
         object? instance = null;
 
         try
         {
-            instance = Activator.CreateInstance(type);
+            instance = Activator.CreateInstance(type, args);
         }
         catch (Exception exception)
         {
