@@ -8,14 +8,14 @@ namespace MailingWebApp.Infrastructure;
 public sealed class StorageInitializerHostedService : IHostedService
 {
     private readonly ILogger<StorageInitializerHostedService> Logger;
-    private readonly IServiceProvider ServiceProvider;
+    private readonly IServiceScopeFactory ServiceScopeFactory;
 
     public StorageInitializerHostedService(
         ILogger<StorageInitializerHostedService> logger,
-        IServiceProvider serviceProvider)
+        IServiceScopeFactory serviceScopeFactory)
     {
         Logger = logger;
-        ServiceProvider = serviceProvider;
+        ServiceScopeFactory = serviceScopeFactory;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ public sealed class StorageInitializerHostedService : IHostedService
 
     private async Task StorageInitializeAsync()
     {
-        using var scope = ServiceProvider.CreateScope();
+        using var scope = ServiceScopeFactory.CreateScope();
         StorageDb storage = scope.ServiceProvider
             .GetRequiredService<StorageDb>();
 

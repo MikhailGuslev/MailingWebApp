@@ -19,18 +19,18 @@ namespace Mailing.Models;
 public sealed class EmailSendingScheduler
 {
     private readonly ILogger Logger;
-    private readonly IServiceProvider ServiceProvider;
+    private readonly IServiceScopeFactory ServiceScopeFactory;
     private readonly MailingServiceSettings Settings;
 
     internal readonly ConcurrentBag<EmailSenderTrigger> ListenedTriggers;
 
     internal EmailSendingScheduler(
         ILogger logger,
-        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory,
         MailingServiceSettings settings)
     {
         Logger = logger;
-        ServiceProvider = serviceProvider;
+        ServiceScopeFactory = serviceScopeFactory;
         Settings = settings;
 
         ListenedTriggers = new();
@@ -38,7 +38,7 @@ public sealed class EmailSendingScheduler
 
     public async Task ScheduleEmailSendingAsync(EmailSendingSchedule schedule)
     {
-        using IServiceScope serviceScope = ServiceProvider.CreateScope();
+        using IServiceScope serviceScope = ServiceScopeFactory.CreateScope();
 
         IEmailSendingRepository EmailSendingRepository = serviceScope.ServiceProvider
             .GetRequiredService<IEmailSendingRepository>();
@@ -55,7 +55,7 @@ public sealed class EmailSendingScheduler
 
     internal async Task RestoringStoragedSendingSchedulesAsync()
     {
-        using IServiceScope serviceScope = ServiceProvider.CreateScope();
+        using IServiceScope serviceScope = ServiceScopeFactory.CreateScope();
 
         IEmailSendingRepository EmailSendingRepository = serviceScope.ServiceProvider
             .GetRequiredService<IEmailSendingRepository>();

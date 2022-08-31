@@ -11,15 +11,15 @@ namespace PluginManager;
 public sealed class PluginService : IPluginService
 {
     // TODO: заменить ServiceProvider на IServiceScopeFactory !
-    private readonly IServiceProvider ServiceProvider;
+    private readonly IServiceScopeFactory ServiceScopeFactory;
     private readonly ILogger<PluginService> Logger;
     private readonly AssemblyLoadContext AssemblyLoadContext;
 
     public PluginService(
         ILogger<PluginService> logger,
-        IServiceProvider serviceProvider)
+        IServiceScopeFactory serviceScopeFactory)
     {
-        ServiceProvider = serviceProvider;
+        ServiceScopeFactory = serviceScopeFactory;
         Logger = logger;
         AssemblyLoadContext = new("plugins", true);
     }
@@ -27,7 +27,7 @@ public sealed class PluginService : IPluginService
     // TODO: реализовать передачу аргументов в конструктор экземпляра
     public async Task<object?> GetPluggableTypeInstanceAsync(InstanceCreationOptions options)
     {
-        using IServiceScope scope = ServiceProvider.CreateScope();
+        using IServiceScope scope = ServiceScopeFactory.CreateScope();
         IPluginRepository pluginRepository = scope.ServiceProvider
             .GetRequiredService<IPluginRepository>();
 

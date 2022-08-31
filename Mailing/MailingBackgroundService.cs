@@ -1,6 +1,7 @@
 ﻿using Mailing.Abstractions;
 using Mailing.Models;
 using Mailing.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -24,21 +25,21 @@ namespace Mailing;
 public sealed class MailingBackgroundService : BackgroundService, IMailingService
 {
     private readonly ILogger Logger;
-    private readonly IServiceProvider ServiceProvider;
+    private readonly IServiceScopeFactory ServiceScopeFactory;
     private readonly MailingServiceSettings Settings;
 
     public MailingBackgroundService(
         ILogger<MailingBackgroundService> logger,
-        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory,
         IOptions<MailingServiceSettings> settings)
     {
         Logger = logger;
-        ServiceProvider = serviceProvider;
+        ServiceScopeFactory = serviceScopeFactory;
         Settings = settings.Value;
 
         EmailSendingScheduler = new(
             Logger,
-            ServiceProvider,
+            ServiceScopeFactory,
             Settings);
     }
 
