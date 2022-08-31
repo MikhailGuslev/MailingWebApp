@@ -35,7 +35,7 @@ public sealed record class EmailSender
 
     public async Task RunSendingAsync(CancellationToken stoppingToken)
     {
-        Logger.LogInformation("Запуск рассылки {sending}", new { Sending.EmailSendingId, Sending.Name });
+        Logger.LogInformation("Активация рассылки {sending}", new { Sending.EmailSendingId, Sending.Name });
 
         using MailKitSmtp.SmtpClient smtpClient = new();
         await smtpClient.ConnectAsync(Settings.SenderServer, Settings.SenderServerPort, false, stoppingToken);
@@ -47,16 +47,14 @@ public sealed record class EmailSender
                 .CreateEmailMessageAsync(recipient);
             await smtpClient.SendAsync(emailMessage, stoppingToken);
 
-            LogSendingSummary(recipient, emailMessage);
+            string info = "Клиенту с id {userId} отправлено сообщение на тему {subject}";
+            Logger.LogInformation(info, recipient.UserId, emailMessage.Subject);
+
             await Task.Yield();
         }
 
-        await smtpClient.DisconnectAsync(true);
-    }
+        Logger.LogInformation("Рассылки {sending} завершена", new { Sending.EmailSendingId, Sending.Name });
 
-    private void LogSendingSummary(Recipient recipient, MimeMessage message)
-    {
-        string info = "Клиенту с id {userId} отправлено сообщение на тему {subject}";
-        Logger.LogInformation(info, recipient.UserId, message.Subject);
+        await smtpClient.DisconnectAsync(true);
     }
 }
