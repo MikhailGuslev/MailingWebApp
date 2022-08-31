@@ -2,6 +2,7 @@
 using LinqToDB;
 using Mailing.Abstractions;
 using PluginManager.Abstractions;
+using PluginManager.Models;
 
 namespace MailingWebApp.Repositories;
 
@@ -16,7 +17,7 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
         PluginService = pluginService;
     }
 
-    public async Task<IMessageModelProvider> GetMessageModelProviderAsync(Type providerType)
+    public async Task<IMessageModelProvider?> GetMessageModelProviderAsync(Type providerType)
     {
         throw new NotImplementedException();
     }
@@ -27,10 +28,13 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
             .FirstOrDefaultAsync(x => x.ModelProviderTypeName == providerTypeName);
 
         IMessageModelProvider? instance = modelProviderDetails is not null
-            ? await PluginService.GetInstanceAsync(
-                modelProviderDetails.ModelProviderTypeName,
-                (int)modelProviderDetails.PluginId,
-                typeof(IMessageModelProvider)) as IMessageModelProvider
+            ? await PluginService.GetInstanceAsync(new InstanceCreationOptions
+            {
+                PluginId = (int)modelProviderDetails.PluginId,
+                TypeName = modelProviderDetails.ModelProviderTypeName,
+                ConstructorArgumets = Array.Empty<object>(),
+                InterfaceType = typeof(IMessageModelProvider)
+            }) as IMessageModelProvider
             : null;
 
         return instance;

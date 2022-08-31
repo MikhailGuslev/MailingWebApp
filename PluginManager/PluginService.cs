@@ -25,25 +25,25 @@ public sealed class PluginService : IPluginService
     }
 
     // TODO: реализовать передачу аргументов в конструктор экземпляра
-    public async Task<object?> GetInstanceAsync(string typeName, int pluginId, Type? interfaceType = null)
+    public async Task<object?> GetInstanceAsync(InstanceCreationOptions options)
     {
         using IServiceScope scope = ServiceProvider.CreateScope();
         IPluginRepository pluginRepository = scope.ServiceProvider
             .GetRequiredService<IPluginRepository>();
 
         string info = "Запрос экземпляра типа {type} из плагина {pluginId}";
-        Logger.LogInformation(info, typeName, pluginId);
+        Logger.LogInformation(info, options.TypeName, options.PluginId);
 
-        PluginInformation? pluginInfo = await GetPlugin(pluginId, pluginRepository);
+        PluginInformation? pluginInfo = await GetPlugin(options.PluginId, pluginRepository);
         Assembly? assembly = pluginInfo is not null
             ? await GetAssembly(pluginInfo, pluginRepository)
             : null;
-        Type? type = assembly is not null ? GetType(typeName, assembly, interfaceType) : null;
+        Type? type = assembly is not null ? GetType(options.TypeName, assembly, options.InterfaceType) : null;
         object? instance = type is not null ? CreateInstance(type) : null;
 
         info = "Экземпляр типа {type} из плагина {pluginId}" +
             instance is not null ? " извлечен " : " не извлечен ";
-        Logger.LogInformation(info, typeName, pluginId);
+        Logger.LogInformation(info, options.TypeName, options.PluginId);
 
         return instance;
     }
