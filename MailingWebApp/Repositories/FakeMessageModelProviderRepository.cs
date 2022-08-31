@@ -28,7 +28,7 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
             .FirstOrDefaultAsync(x => x.ModelProviderTypeName == providerTypeName);
 
         IMessageModelProvider? instance = modelProviderDetails is not null
-            ? await PluginService.GetInstanceAsync(new InstanceCreationOptions
+            ? await PluginService.GetPluggableTypeInstanceAsync(new InstanceCreationOptions
             {
                 PluginId = (int)modelProviderDetails.PluginId,
                 TypeName = modelProviderDetails.ModelProviderTypeName,

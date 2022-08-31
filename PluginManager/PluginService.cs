@@ -25,7 +25,7 @@ public sealed class PluginService : IPluginService
     }
 
     // TODO: реализовать передачу аргументов в конструктор экземпляра
-    public async Task<object?> GetInstanceAsync(InstanceCreationOptions options)
+    public async Task<object?> GetPluggableTypeInstanceAsync(InstanceCreationOptions options)
     {
         using IServiceScope scope = ServiceProvider.CreateScope();
         IPluginRepository pluginRepository = scope.ServiceProvider
