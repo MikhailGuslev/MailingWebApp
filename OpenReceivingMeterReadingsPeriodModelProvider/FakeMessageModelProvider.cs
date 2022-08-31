@@ -1,26 +1,24 @@
 ﻿using LinqToDB;
-using LinqToDB.Configuration;
 using Mailing.Abstractions;
 using Mailing.Models;
+using Microsoft.Extensions.DependencyInjection;
 using OpenReceivingMeterReadingsPeriodModelProvider.Models;
 using Dal = DataLayer.Entities;
 
 namespace OpenReceivingMeterReadingsPeriodModelProvider;
 
-public class FakeMessageModelProvider : IMessageModelProvider
+public sealed class FakeMessageModelProvider : MessageModelProviderBase
 {
-    private readonly LinqToDBConnectionOptions<Dal.StorageDb> ConnectionOptions;
-
-    public FakeMessageModelProvider()
+    public FakeMessageModelProvider(IServiceScopeFactory serviceScopeFactory)
+        : base(serviceScopeFactory)
     {
-        ConnectionOptions = new LinqToDBConnectionOptionsBuilder()
-            .UseSQLite("Data Source=./bin/Debug/storage.db")
-            .Build<Dal.StorageDb>();
     }
 
-    public async Task<IMessageModel> GetModelAsync(Recipient recipient)
+    public override async Task<IMessageModel> GetModelAsync(Recipient recipient)
     {
-        using Dal.StorageDb storage = new(ConnectionOptions);
+        using IServiceScope scope = ServiceScopeFactory.CreateScope();
+        Dal.StorageDb storage = scope.ServiceProvider
+            .GetRequiredService<Dal.StorageDb>();
 
         MeterReadingsPeriodDetails[] fakeDetails = await storage.MeterReadingsPeriodDetails
             .Where(x => x.UserId == recipient.UserId)
