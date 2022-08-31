@@ -31,7 +31,7 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
             ? await PluginService.GetPluggableTypeInstanceAsync(new InstanceCreationOptions
             {
                 PluginId = (int)modelProviderDetails.PluginId,
-                TypeName = modelProviderDetails.ModelProviderTypeName,
+                PluggableTypeName = modelProviderDetails.ModelProviderTypeName,
                 ConstructorArgumets = Array.Empty<object>(),
                 InterfaceType = typeof(IMessageModelProvider)
             }) as IMessageModelProvider

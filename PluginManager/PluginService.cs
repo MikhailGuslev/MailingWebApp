@@ -32,18 +32,18 @@ public sealed class PluginService : IPluginService
             .GetRequiredService<IPluginRepository>();
 
         string info = "Запрос экземпляра типа {type} из плагина {pluginId}";
-        Logger.LogInformation(info, options.TypeName, options.PluginId);
+        Logger.LogInformation(info, options.PluggableTypeName, options.PluginId);
 
         PluginInformation? pluginInfo = await GetPlugin(options.PluginId, pluginRepository);
         Assembly? assembly = pluginInfo is not null
             ? await GetAssembly(pluginInfo, pluginRepository)
             : null;
-        Type? type = assembly is not null ? GetType(options.TypeName, assembly, options.InterfaceType) : null;
+        Type? type = assembly is not null ? GetType(options.PluggableTypeName, assembly, options.InterfaceType) : null;
         object? instance = type is not null ? CreateInstance(type, options.ConstructorArgumets) : null;
 
         info = "Экземпляр типа {type} из плагина {pluginId}" +
             instance is not null ? " извлечен " : " не извлечен ";
-        Logger.LogInformation(info, options.TypeName, options.PluginId);
+        Logger.LogInformation(info, options.PluggableTypeName, options.PluginId);
 
         return instance;
     }
