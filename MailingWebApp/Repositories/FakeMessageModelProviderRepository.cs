@@ -10,11 +10,16 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
 {
     private readonly StorageDb Storage;
     private readonly IPluginService PluginService;
+    private readonly IServiceScopeFactory ServiceScopeFactory;
 
-    public FakeMessageModelProviderRepository(StorageDb storage, IPluginService pluginService)
+    public FakeMessageModelProviderRepository(
+        IServiceScopeFactory scopeFactory,
+        StorageDb storage,
+        IPluginService pluginService)
     {
         Storage = storage;
         PluginService = pluginService;
+        ServiceScopeFactory = scopeFactory;
     }
 
     public async Task<IMessageModelProvider?> GetMessageModelProviderAsync(Type providerType)
@@ -32,7 +37,7 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
             {
                 PluginId = (int)modelProviderDetails.PluginId,
                 PluggableTypeName = modelProviderDetails.ModelProviderTypeName,
-                ConstructorArgumets = Array.Empty<object>(),
+                ConstructorArgumets = new[] { ServiceScopeFactory },
                 InterfaceType = typeof(IMessageModelProvider)
             }) as IMessageModelProvider
             : null;
