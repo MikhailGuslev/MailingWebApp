@@ -8,7 +8,8 @@ public sealed record class EmailSenderTrigger
     internal enum TriggerState { Waiting = 0, Triggered, Deactivated }
 
     internal TriggerState CurrentState = TriggerState.Waiting;
-    private DateTime LastActivation = DateTime.MinValue;
+
+    private DateTime NextActivation = DateTime.MinValue;
 
     public EmailSenderTrigger(EmailSender targetSender, EmailSendingSchedule sendingSchedule)
     {
@@ -32,20 +33,27 @@ public sealed record class EmailSenderTrigger
 
         if (CurrentState == TriggerState.Triggered)
         {
-            LastActivation = DateTime.Now;
             await TargetSender.RunSendingAsync(stoppingToken);
         }
     }
 
     private TriggerState GetNextState()
     {
-        if (DateTime.Now >= Schedule.DeactivationTimePoint)
+        if (NextActivation == DateTime.MinValue)
+        {
+            NextActivation = Schedule.GetNextActivation(Schedule.LastActivation);
+        }
+
+        DateTime now = DateTime.Now;
+
+        if (now >= Schedule.DeactivationTimePoint)
         {
             return TriggerState.Deactivated;
         }
 
-        if ((DateTime.Now - LastActivation) >= Schedule.ActivationInterval)
+        if (DateTime.Now >= NextActivation)
         {
+            NextActivation = Schedule.GetNextActivation(DateTime.Now);
             return TriggerState.Triggered;
         }
 
