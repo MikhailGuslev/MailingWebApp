@@ -16,10 +16,11 @@ namespace DataLayer.Entities
 	[Table("EmailSendingSchedule")]
 	public class EmailSendingSchedule
 	{
-		[Column("EmailSendingScheduleId")] public long     EmailSendingScheduleId { get; set; } // integer
-		[Column("ActivationTimePoint"   )] public DateTime ActivationTimePoint    { get; set; } // datetime
-		[Column("DeactivationTimePoint" )] public DateTime DeactivationTimePoint  { get; set; } // datetime
-		[Column("ActivationInterval"    )] public long     ActivationInterval     { get; set; } // integer
-		[Column("EmailSendingId"        )] public long     EmailSendingId         { get; set; } // integer
+		[Column("EmailSendingScheduleId"                   )] public long     EmailSendingScheduleId { get; set; } // integer
+		[Column("ActivationTimePoint"                      )] public DateTime ActivationTimePoint    { get; set; } // datetime
+		[Column("DeactivationTimePoint"                    )] public DateTime DeactivationTimePoint  { get; set; } // datetime
+		[Column("RecurrenceActivation"  , CanBeNull = false)] public string   RecurrenceActivation   { get; set; } = null!; // text(max)
+		[Column("LastActivation"                           )] public DateTime LastActivation         { get; set; } // datetime
+		[Column("EmailSendingId"                           )] public long     EmailSendingId         { get; set; } // integer
 	}
 }

@@ -61,7 +61,8 @@ create table EmailSendingSchedule
     EmailSendingScheduleId integer not null,
     ActivationTimePoint datetime not null,
     DeactivationTimePoint datetime not null,
-    ActivationInterval integer not null,
+    RecurrenceActivation text not null,
+    LastActivation datetime not null,
 
     EmailSendingId integer not null
 );
