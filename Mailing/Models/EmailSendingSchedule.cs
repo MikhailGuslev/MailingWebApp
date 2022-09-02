@@ -1,15 +1,26 @@
-﻿namespace Mailing.Models;
+﻿using Mailing.Infrastructure;
+
+namespace Mailing.Models;
 
 /// <summary>
 /// Расписание активации рассылки email
 /// </summary>
 public sealed record class EmailSendingSchedule
 {
+    public EmailSendingSchedule()
+    {
+    }
+
+    public EmailSendingSchedule(DateTime lastactivation)
+    {
+        LastActivation = lastactivation;
+    }
+
     public int EmailSendingScheduleId { get; init; }
     public EmailSending EmailSending { get; init; } = new();
     public DateTime ActivationTimePoint { get; init; } = DateTime.MinValue;
     public DateTime DeactivationTimePoint { get; init; } = DateTime.MinValue;
-    public TimeSpan ActivationInterval { get; init; } = TimeSpan.Zero;
+    public Recurrence RecurrenceActivation { get; init; } = Recurrence.Empty;
 
     public DateTime LastActivation { get; private set; } = DateTime.MinValue;
 
@@ -18,32 +29,27 @@ public sealed record class EmailSendingSchedule
         LastActivation = DateTime.Now;
     }
 
-    public DateTime? GetNextActivation()
+    public DateTime GetNextActivation(DateTime? originalPoint = null)
     {
-        if (DateTime.Now >= DeactivationTimePoint) return null;
-
-        TimeSpan elapsed = DateTime.Now - LastActivation;
-
-        if (elapsed > ActivationInterval)
+        if ((originalPoint ?? DateTime.Now) >= DeactivationTimePoint)
         {
-            // NOTE: актуализация времени последней активации
-            (long countActivation, long remainder) = Math
-                .DivRem(elapsed.Ticks, ActivationInterval.Ticks);
-
-            LastActivation += countActivation * ActivationInterval;
-            elapsed = DateTime.Now - LastActivation;
+            return DateTime.MaxValue;
         }
 
-        DateTime maybeNext = LastActivation + ActivationInterval - elapsed;
-
-        return maybeNext >= DeactivationTimePoint
-            ? null
-            : maybeNext;
+        return RecurrenceActivation.GetNextFiring(originalPoint ?? DateTime.Now);
     }
 
-    public bool Validate()
+    public void Validate()
     {
-        return ActivationTimePoint < DeactivationTimePoint
-            && (ActivationTimePoint + ActivationInterval) < DeactivationTimePoint;
+        if (ActivationTimePoint > DeactivationTimePoint)
+        {
+            string error = "некорректно настроено расписание - дата начала активации превышает дату деактивации";
+            throw new MailingException(error);
+        }
+
+        if (RecurrenceActivation.IsEmpty is false)
+        {
+            RecurrenceActivation.Validate();
+        }
     }
 }
