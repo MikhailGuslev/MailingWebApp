@@ -236,15 +236,18 @@ public sealed class StorageInitializerHostedService : IHostedService
                         <th>Окончание приёма</th>
                     </thead>
                     <tbody>
-                    {{ for item in body_model.meter_readings_period_details }}
-                        <tr>
-                            <td>{{ item.service_provider_name }}</td>
-                            <td>{{ item.provided_service_name }}</td>
-                            <td>{{ item.metering_device       }}</td>
-                            <td>{{ item.start_taking_readings }}</td>
-                            <td>{{ item.end_taking_readings   }}</td>
-                        </tr>
-                    {{ end }}
+                        <center>
+                            <img src=""cid:cool_picture"">
+                        </center>
+                        {{ for item in body_model.meter_readings_period_details }}
+                            <tr>
+                                <td>{{ item.service_provider_name }}</td>
+                                <td>{{ item.provided_service_name }}</td>
+                                <td>{{ item.metering_device       }}</td>
+                                <td>{{ item.start_taking_readings }}</td>
+                                <td>{{ item.end_taking_readings   }}</td>
+                            </tr>
+                        {{ end }}
                     </tbody>
                 </table>
             </body>

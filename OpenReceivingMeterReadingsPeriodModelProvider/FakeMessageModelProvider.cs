@@ -22,6 +22,7 @@ public sealed class FakeMessageModelProvider : MessageModelProviderBase
 
         MimePart attachment = new("image", "png")
         {
+            ContentId = "cool_picture",
             Content = new MimeContent(picture, ContentEncoding.Default),
             ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
             ContentTransferEncoding = ContentEncoding.Base64,

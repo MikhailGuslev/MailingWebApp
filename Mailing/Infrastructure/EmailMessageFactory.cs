@@ -50,9 +50,11 @@ public sealed class EmailMessageFactory
         {
             case MessageContentType.PlainText:
                 bodyBuilder.TextBody = message.Body;
+                AttacheItems();
                 break;
             case MessageContentType.Html:
                 bodyBuilder.HtmlBody = message.Body;
+                AttacheItems(asLinked: true);
                 break;
             default:
                 string error =
@@ -61,11 +63,21 @@ public sealed class EmailMessageFactory
                 throw new MailingException(error);
         }
 
-        foreach (MimeEntity item in message.Attachments)
-        {
-            bodyBuilder.Attachments.Add(item);
-        }
-
         return bodyBuilder.ToMessageBody();
+
+        void AttacheItems(bool asLinked = false)
+        {
+            foreach (MimeEntity item in message.Attachments)
+            {
+                if (asLinked)
+                {
+                    bodyBuilder.LinkedResources.Add(item);
+                }
+                else
+                {
+                    bodyBuilder.Attachments.Add(item);
+                }
+            }
+        }
     }
 }
