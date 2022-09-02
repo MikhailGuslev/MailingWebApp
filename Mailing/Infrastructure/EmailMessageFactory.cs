@@ -61,6 +61,11 @@ public sealed class EmailMessageFactory
                 throw new MailingException(error);
         }
 
+        foreach (MimeEntity item in message.Attachments)
+        {
+            bodyBuilder.Attachments.Add(item);
+        }
+
         return bodyBuilder.ToMessageBody();
     }
 }

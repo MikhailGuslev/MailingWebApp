@@ -1,5 +1,6 @@
 ﻿using Mailing.Abstractions;
 using Mailing.Models;
+using MimeKit;
 using Scriban;
 
 namespace Mailing.Infrastructure;
@@ -32,7 +33,9 @@ public sealed class MessageFactory
         return new Message
         {
             Subject = await GetSubject(model),
-            Body = await GetBody(model)
+            Body = await GetBody(model),
+            Attachments = model?.Attachments
+                ?? Enumerable.Empty<MimeEntity>().ToList()
         };
     }
 
