@@ -67,7 +67,9 @@ public sealed class EmailMessageFactory
 
         void AttacheItems(bool asLinked = false)
         {
-            foreach (MimeEntity item in message.Attachments)
+            IEnumerable<MimeEntity> attachments = message.Attachments
+                .Select(x => x.MapToMimeEntity());
+            foreach (MimeEntity item in attachments)
             {
                 if (asLinked)
                 {

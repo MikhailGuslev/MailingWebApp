@@ -35,7 +35,7 @@ public sealed class MessageFactory
             Subject = await GetSubject(model),
             Body = await GetBody(model),
             Attachments = model?.Attachments
-                ?? Enumerable.Empty<MimeEntity>().ToList()
+                ?? Enumerable.Empty<MessageAttachment>().ToList()
         };
     }
 

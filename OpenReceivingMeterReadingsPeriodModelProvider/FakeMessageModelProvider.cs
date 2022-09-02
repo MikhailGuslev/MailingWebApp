@@ -2,7 +2,6 @@
 using Mailing.Abstractions;
 using Mailing.Models;
 using Microsoft.Extensions.DependencyInjection;
-using MimeKit;
 using OpenReceivingMeterReadingsPeriodModelProvider.Models;
 using Dal = DataLayer.Entities;
 
@@ -17,17 +16,17 @@ public sealed class FakeMessageModelProvider : MessageModelProviderBase
 
     public override async Task<IMessageModel> GetModelAsync(Recipient recipient)
     {
-        string pictureFile = @"D:/Downloads/k9vu6lha38291.png";
-        FileStream picture = File.OpenRead(pictureFile);
+        string pictureFile = @"D:/Downloads/msg1000577385-91011.jpg";
 
-        MimePart attachment = new("image", "png")
-        {
-            ContentId = "cool_picture",
-            Content = new MimeContent(picture, ContentEncoding.Default),
-            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-            ContentTransferEncoding = ContentEncoding.Base64,
-            FileName = Path.GetFileName(pictureFile)
-        };
+        MessageAttachment attachment = File.Exists(pictureFile) is false
+            ? new()
+            : new()
+            {
+                MessageAttachmentId = "cool_picture",
+                ContentType = "image/jpg",
+                Content = File.ReadAllBytes(pictureFile),
+                OriginalContentName = pictureFile
+            };
 
         using IServiceScope scope = ServiceScopeFactory.CreateScope();
         Dal.StorageDb storage = scope.ServiceProvider

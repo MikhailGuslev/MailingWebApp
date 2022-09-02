@@ -1,22 +1,22 @@
 ﻿using Mailing.Abstractions;
-using MimeKit;
+using Mailing.Models;
 
 namespace OpenReceivingMeterReadingsPeriodModelProvider.Models;
 
 public sealed class MessageModel : IMessageModel
 {
-    public MessageModel(MeterReadingsPeriodDetails[] details, MimePart attachment)
+    public MessageModel(MeterReadingsPeriodDetails[] details, MessageAttachment attachment)
     {
         BodyModel = new MessageBodyModel
         {
             MeterReadingsPeriodDetails = details,
         };
 
-        Attachments = new List<MimeEntity> { attachment };
+        Attachments = new List<MessageAttachment> { attachment };
     }
 
     public IMessageSubjectModel? SubjectModel => null;
 
     public IMessageBodyModel? BodyModel { get; }
-    public IReadOnlyList<MimeEntity> Attachments { get; init; }
+    public IReadOnlyList<MessageAttachment> Attachments { get; init; }
 }
