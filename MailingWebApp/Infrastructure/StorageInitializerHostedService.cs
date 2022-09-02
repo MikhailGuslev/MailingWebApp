@@ -1,7 +1,10 @@
-﻿using DataLayer.Entities;
+﻿using Common.Infrastructure;
+using DataLayer.Entities;
 using LinqToDB;
 using LinqToDB.Data;
 using System.Reflection;
+using System.Text.Json;
+using MailingModels = Mailing.Models;
 
 namespace MailingWebApp.Infrastructure;
 
@@ -289,6 +292,16 @@ public sealed class StorageInitializerHostedService : IHostedService
 
     private async Task EmailSendingScheduleInitialize(StorageDb storage)
     {
+        JsonSerializerOptions options = new();
+        options.Converters.Add(new TimeOnlyConverter());
+
+        MailingModels.Recurrence recurrence = new()
+        {
+            Time = new(10, 35),
+            Month = new() { EveryMonth = true },
+            DayOfMonth = new() { Special = MailingModels.RecurrenceDayOfMonthSpecial.EveryDay }
+        };
+
         List<EmailSendingSchedule> entities = new()
         {
             new()
@@ -296,7 +309,7 @@ public sealed class StorageInitializerHostedService : IHostedService
                 EmailSendingScheduleId = 1,
                 ActivationTimePoint = DateTime.Now.AddMinutes(-1),
                 DeactivationTimePoint = DateTime.Now.AddSeconds(5),
-                ActivationInterval = TimeSpan.FromSeconds(1).Ticks,
+                RecurrenceActivation = JsonSerializer.Serialize(recurrence, options),
                 EmailSendingId = 1,
             }
         };

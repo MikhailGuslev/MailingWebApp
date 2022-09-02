@@ -1,6 +1,8 @@
-﻿using LinqToDB;
+﻿using Common.Infrastructure;
+using LinqToDB;
 using Mailing.Abstractions;
 using Mailing.Models;
+using System.Text.Json;
 using Dal = DataLayer.Entities;
 
 namespace MailingWebApp.Repositories;
@@ -79,6 +81,9 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 
     public async Task<IReadOnlyList<EmailSendingSchedule>> GetEmailSendingSchedulesAsync()
     {
+        JsonSerializerOptions options = new();
+        options.Converters.Add(new TimeOnlyConverter());
+
         IReadOnlyList<EmailSending> sendings = await GetSendingsAsync();
 
         List<Dal.EmailSendingSchedule> rawSchedules = await Storage.EmailSendingSchedule
@@ -88,13 +93,15 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         .Join(sendings,
             e => e.EmailSendingId,
             s => s.EmailSendingId,
-            (e, s) => new EmailSendingSchedule
+            (e, s) => new EmailSendingSchedule(e.LastActivation)
             {
                 EmailSendingScheduleId = (int)e.EmailSendingScheduleId,
                 EmailSending = s,
                 ActivationTimePoint = e.ActivationTimePoint,
                 DeactivationTimePoint = e.DeactivationTimePoint,
-                ActivationInterval = TimeSpan.FromTicks(e.ActivationInterval)
+                RecurrenceActivation = JsonSerializer
+                    .Deserialize<Recurrence>(e.RecurrenceActivation, options)
+                    ?? throw new ApplicationException("ошибка загрузки расписания рассылок"),
             })
         .ToList();
 
