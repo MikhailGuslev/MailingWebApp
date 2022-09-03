@@ -9,7 +9,7 @@ namespace Mailing.Models;
 /// <summary>
 /// Отправщик сообщения заданным получателям
 /// </summary>
-public sealed record class EmailSender
+internal sealed record class EmailSender
 {
     private readonly ILogger Logger;
 

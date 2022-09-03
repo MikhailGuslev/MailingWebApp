@@ -3,7 +3,7 @@
 /// <summary>
 /// Триггер, запускающий рассылку в соответствии с расписанием
 /// </summary>
-public sealed record class EmailSenderTrigger
+internal sealed record class EmailSenderTrigger
 {
     internal enum TriggerState { Waiting = 0, Triggered, Deactivated }
 
