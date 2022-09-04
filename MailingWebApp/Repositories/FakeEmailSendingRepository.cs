@@ -27,7 +27,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         FakeRecipientRepository = fakeRecipientRepository;
     }
 
-    public async Task<IReadOnlyList<EmailSending>> GetSendingsAsync()
+    public async Task<IReadOnlyList<EmailSending>> GetEmailSendingsAsync()
     {
         IReadOnlyList<RawEmailSending> rawSendings = await Storage.EmailSending
             .Join(Storage.MessageTemplate,
@@ -84,7 +84,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         JsonSerializerOptions options = new();
         options.Converters.Add(new TimeOnlyConverter());
 
-        IReadOnlyList<EmailSending> sendings = await GetSendingsAsync();
+        IReadOnlyList<EmailSending> sendings = await GetEmailSendingsAsync();
 
         List<Dal.EmailSendingSchedule> rawSchedules = await Storage.EmailSendingSchedule
             .ToListAsync();
