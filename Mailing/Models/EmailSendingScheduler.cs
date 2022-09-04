@@ -31,6 +31,15 @@ public sealed class EmailSendingScheduler
         ListenedTriggers = new();
     }
 
+    public async Task<IReadOnlyList<EmailSending>> GetAllEmailSendingsAsync()
+    {
+        using IServiceScope scope = ServiceScopeFactory.CreateScope();
+        IEmailSendingRepository repository = scope.ServiceProvider
+            .GetRequiredService<IEmailSendingRepository>();
+
+        return await repository.GetEmailSendingsAsync();
+    }
+
     public async Task ScheduleEmailSendingAsync(EmailSendingSchedule schedule)
     {
         using IServiceScope serviceScope = ServiceScopeFactory.CreateScope();
