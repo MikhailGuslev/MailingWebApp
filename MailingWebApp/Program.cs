@@ -22,6 +22,7 @@ builder.Services
     .AddStorageContext()
     .AddScopedRepositories()
     .AddSingleton<IPluginService, PluginService>()
+    .AddSingleton<MailingBackgroundService>()
     .AddHostedService<StorageInitializerHostedService>()
     .AddHostedService<MailingBackgroundService>();
 
