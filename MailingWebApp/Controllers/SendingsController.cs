@@ -29,15 +29,17 @@ public class SendingsController : ControllerBase
 
     // GET api/<SendingsController>/5
     [HttpGet("{id}")]
-    public string Get(int id)
+    public async Task<EmailSending> Get(int id)
     {
-        return "value";
+        EmailSending emailSending = await EmailSendingScheduler.GetEmailSendingByIdAsync(id);
+        return emailSending;
     }
 
     // POST api/<SendingsController>
     [HttpPost]
-    public void Post([FromBody] string value)
+    public async Task Post([FromBody] EmailSending emailSending)
     {
+        await EmailSendingSchedule.AddEmailSendingAsync(emailSending);
     }
 
     // PUT api/<SendingsController>/5

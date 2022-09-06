@@ -40,6 +40,29 @@ public sealed class EmailSendingScheduler
         return await repository.GetEmailSendingsAsync();
     }
 
+    public async Task<EmailSending> GetEmailSendingByIdAsync(int id)
+    {
+        using IServiceScope scope = ServiceScopeFactory.CreateScope();
+        IEmailSendingRepository repository = scope.ServiceProvider
+            .GetRequiredService<IEmailSendingRepository>();
+
+        return await repository.GetEmailSendingByIdAsync(id);
+    }
+
+    public async Task AddEmailSendingAsync(EmailSending emailSending)
+    {
+        using IServiceScope scope = ServiceScopeFactory.CreateScope();
+        IEmailSendingRepository repository = scope.ServiceProvider
+            .GetRequiredService<IEmailSendingRepository>();
+
+        await repository.AddEmailSendingAsync(emailSending);
+    }
+
+    public async Task AddEmailSendingScheduleAsync(EmailSending emailSending)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task ScheduleEmailSendingAsync(EmailSendingSchedule schedule)
     {
         using IServiceScope serviceScope = ServiceScopeFactory.CreateScope();
