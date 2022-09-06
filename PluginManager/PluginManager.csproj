@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mailing\Mailing.csproj" />
+    <ProjectReference Include="..\PluginManager.Abstractions\PluginManager.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

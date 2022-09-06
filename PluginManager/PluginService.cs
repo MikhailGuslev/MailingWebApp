@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PluginManager.Abstractions;
+using PluginManager.Infrastructure;
 using PluginManager.Models;
-using System.Reflection;
+using System.Collections.Concurrent;
 using System.Runtime.Loader;
 
 namespace PluginManager;
@@ -10,10 +11,9 @@ namespace PluginManager;
 // NOTE: draft version !!!
 public sealed class PluginService : IPluginService
 {
-    // TODO: заменить ServiceProvider на IServiceScopeFactory !
     private readonly IServiceScopeFactory ServiceScopeFactory;
     private readonly ILogger<PluginService> Logger;
-    private readonly AssemblyLoadContext AssemblyLoadContext;
+    private readonly ConcurrentDictionary<int, PluginAssemblyLoadContext> PluginAssemblyLoadContexts = new();
 
     public PluginService(
         ILogger<PluginService> logger,
@@ -24,149 +24,77 @@ public sealed class PluginService : IPluginService
         AssemblyLoadContext = new("plugins", true);
     }
 
-    // TODO: реализовать передачу аргументов в конструктор экземпляра
-    public async Task<object?> GetPluggableTypeInstanceAsync(InstanceCreationOptions options)
+    // NOTE: вызывать обернув в try catch
+    public async Task<IPlugin> GetPluginInstanceAsync(int pluginAssemblyId, object[] arguments)
+    {
+        PluginAssemblyLoadContext? context = null;
+
+        PluginAssemblyLoadContexts.TryGetValue(pluginAssemblyId, out context);
+
+        if (context is null)
+        {
+            PluginAssembly pluginAssembly = await GetPluginAssembly(pluginAssemblyId);
+            context = new();
+            context.Load(pluginAssembly);
+        }
+
+        bool ok = PluginAssemblyLoadContexts.TryAdd(pluginAssemblyId, context);
+        if (ok is false)
+        {
+            ok = PluginAssemblyLoadContexts.TryGetValue(pluginAssemblyId, out context);
+        }
+
+        if (ok is false || context is null)
+        {
+            string error =
+                $"Не удалось получить контекст загрузки {nameof(PluginAssemblyLoadContext)}" +
+                $"сборки плагина с ID: {pluginAssemblyId}. " +
+                $"Конфликт длоступа к элементам словаря {nameof(PluginAssemblyLoadContexts)}";
+            throw new PluginManagerException(error);
+        }
+
+        return context.GetPluginInstance(arguments);
+    }
+
+    public Task<IPluginSettings> GetPluginSettingsInstanceAsync(int pluginAssemblyId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IReadOnlyList<PluginAssemblyInformation>> GetPluginAssemblyInformationsAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<PluginAssemblyInformation> GetPluginAssemblyInformationAsync(int pluginAssemblyId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task AddPluginAssemblyAsync(PluginAssembly plugin)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdatePluginAssemblyAsync(PluginAssembly plugin)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async Task<PluginAssembly> GetPluginAssembly(int pluginAssemblyId)
     {
         using IServiceScope scope = ServiceScopeFactory.CreateScope();
-        IPluginRepository pluginRepository = scope.ServiceProvider
-            .GetRequiredService<IPluginRepository>();
+        IPluginAssemblyRepository repository = scope.ServiceProvider
+            .GetRequiredService<IPluginAssemblyRepository>();
 
-        string info = "Запрос экземпляра типа {type} из плагина {pluginId}";
-        Logger.LogInformation(info, options.PluggableTypeName, options.PluginId);
+        PluginAssembly? pluginAssembly = await repository.GetPluginAssemblyAsync(pluginAssemblyId);
 
-        PluginInformation? pluginInfo = await GetPlugin(options.PluginId, pluginRepository);
-        Assembly? assembly = pluginInfo is not null
-            ? await GetAssembly(pluginInfo, pluginRepository)
-            : null;
-        Type? type = assembly is not null ? GetType(options.PluggableTypeName, assembly, options.InterfaceType) : null;
-        object? instance = type is not null ? CreateInstance(type, options.ConstructorArgumets) : null;
+        if (pluginAssembly == null)
+        {
+            string error = $"Не удалось получить сборку плагина с ID:{pluginAssemblyId}";
+            throw new PluginManagerException(error);
+        }
 
-        info = "Экземпляр типа {type} из плагина {pluginId}" +
-            instance is not null ? " извлечен " : " не извлечен ";
-        Logger.LogInformation(info, options.PluggableTypeName, options.PluginId);
-
-        return instance;
+        return pluginAssembly;
     }
-
-    public async Task AddPluginAsync(Plugin plugin)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task UpdatePluginAsync(Plugin plugin)
-    {
-        throw new NotImplementedException();
-    }
-
-
-    private async Task<PluginInformation?> GetPlugin(int pluginId, IPluginRepository pluginRepository)
-    {
-        // TODO: реализовать кэширование данных загружаемых плагинов (в словаре)
-
-        PluginInformation? pluginInfo = await pluginRepository
-            .GetPluginInformationAsync(pluginId);
-
-        if (pluginInfo is null)
-        {
-            string error = "Не удалось извлечь данные плагина {pluginId}";
-            Logger.LogError(error, pluginId);
-            return null;
-        }
-
-        string info = "Данные плагина {pluginId} загружены из хранилища";
-        Logger.LogInformation(info, pluginId);
-
-        return pluginInfo;
-    }
-
-    private async Task<Assembly?> GetAssembly(
-        PluginInformation pluginInfo,
-        IPluginRepository pluginRepository)
-    {
-        string info = string.Empty;
-
-        Assembly? assembly = AssemblyLoadContext.Assemblies
-            .FirstOrDefault(x => x.FullName == pluginInfo.Name);
-
-        if (assembly != null)
-        {
-            info = "Cборка плагина {pluginId} извлечена из кэша";
-            Logger.LogInformation(info, pluginInfo.PluginId);
-
-            return assembly;
-        }
-
-        Plugin? plugin = await pluginRepository
-                .GetPluginAsync(pluginInfo.PluginId);
-        if (plugin is null)
-        {
-            string error = "(!?) Проблемный плагин {pluginName} - pluginInfo есть, а сам plugin равен null";
-            Logger.LogError(error, pluginInfo.Name);
-            return null;
-        }
-
-        try
-        {
-            using MemoryStream stream = new(plugin.Data);
-            assembly = AssemblyLoadContext.LoadFromStream(stream);
-
-            info = "Сборка плагина {pluginId} загружена из хранилища";
-            Logger.LogInformation(info, pluginInfo.PluginId);
-
-            return assembly;
-        }
-        catch (Exception exception)
-        {
-            string error = "В процессе загрузки плагина {pluginName} возникло исключение {exception}";
-            Logger.LogError(error, pluginInfo.Name, exception);
-        }
-
-        return null;
-    }
-
-    private Type? GetType(string typeName, Assembly assembly, Type? interfaceType = null)
-    {
-        Type? type = assembly
-            .DefinedTypes
-            .Where(t => t.Name
-                .Equals(typeName, StringComparison.OrdinalIgnoreCase))
-            .Where(t => interfaceType == null || t.IsAssignableTo(interfaceType))
-            .FirstOrDefault();
-
-        if (type is null)
-        {
-            string error = "Запрашиваемый тип {type} не обнаружен";
-            Logger.LogError(error, typeName);
-
-            return null;
-        }
-
-        return type;
-    }
-
-    private object? CreateInstance(Type type, object[] args)
-    {
-        object? instance = null;
-
-        try
-        {
-            instance = Activator.CreateInstance(type, args);
-        }
-        catch (Exception exception)
-        {
-            string error = "Создание экземпляра {type} привело к исключению {exception}";
-            Logger.LogError(error, type.Name, exception);
-
-            return null;
-        }
-
-        if (instance is null)
-        {
-            string error = "Не удалось создать экземпляр {type}";
-            Logger.LogError(error, type.Name);
-        }
-
-        return instance;
-    }
-
 }

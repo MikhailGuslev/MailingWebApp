@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
         services
             .AddScoped<IMessageModelProviderRepository, FakeMessageModelProviderRepository>()
             .AddScoped<IEmailSendingRepository, FakeEmailSendingRepository>()
-            .AddScoped<IPluginRepository, FakePluginRepository>()
+            .AddScoped<IPluginAssemblyRepository, FakePluginRepository>()
             .AddScoped<FakeMessageTemplateRepository>()
             .AddScoped<FakeUserRepository>()
             .AddScoped<FakeRecipientRepository>();
