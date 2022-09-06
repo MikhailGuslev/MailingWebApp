@@ -46,37 +46,28 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         // TODO: get all users
 
         IEnumerable<Task<EmailSending>> tasks = rawSendings
-            .Select(async x => new EmailSending
-            {
-                EmailSendingId = (int)x.Sending.SendingId,
-                Name = x.Sending.Name,
-                MessageTemplate = new()
-                {
-                    MessageTemplateId = (int)x.MessageTemplate.MessageTemplateId,
-                    Subject = x.MessageTemplate.Subject,
-                    Body = x.MessageTemplate.Body,
-                    ContentType = x.MessageTemplate.ContentType switch
-                    {
-                        "PlainText" => Mailing.Enums.MessageContentType.PlainText,
-                        "Html" => Mailing.Enums.MessageContentType.Html,
-                        _ => throw new ArgumentException(
-                            "ContentType задан неверно {type}",
-                            x.MessageTemplate.ContentType)
-                    },
-                    IsBodyStatic = x.MessageTemplate.IsBodyStatic,
-                    IsSubjectStatic = x.MessageTemplate.IsSubjectStatic,
-                    ModelProvider = x.ModelProvider is null
-                        ? null
-                        : await MessageModelProviderRepository
-                            .GetMessageModelProviderAsync(x.ModelProvider.ModelProviderTypeName)
-                },
-                Recipients = await FakeRecipientRepository
-                    .GetRecipientsByStringAsync(x.Sending.Recipients)
-            });
+            .Select(async x => await MapToEmailSending(x));
 
         IEnumerable<EmailSending> sendings = await Task.WhenAll(tasks);
 
         return sendings.ToList();
+    }
+
+    public async Task<EmailSending> GetEmailSendingByIdAsync(int id)
+    {
+        RawEmailSending? rawSendings = await Storage.EmailSending
+            .Join(Storage.MessageTemplate,
+                s => s.MessageTemplateId,
+                t => t.MessageTemplateId,
+                (s, t) => new { Sending = s, Template = t })
+            .Join(Storage.ModelProvider,
+                a => a.Template.ModelProviderId,
+                b => b.ModelProviderId,
+                (a, b) =>
+                    new RawEmailSending(a.Sending, a.Template, b))
+            .FirstAsync(x => x.Sending.SendingId == id);
+
+        return await MapToEmailSending(rawSendings);
     }
 
     public async Task<IReadOnlyList<EmailSendingSchedule>> GetEmailSendingSchedulesAsync()
@@ -108,8 +99,64 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
         return schedules;
     }
 
+    public async Task AddEmailSendingAsync(EmailSending emailSending)
+    {
+        Dal.EmailSending entity = MapTyDalEntity(emailSending);
+        await Storage.InsertAsync(entity);
+    }
+
     public async Task AddEmailSendingScheduleAsync(EmailSendingSchedule schedule)
     {
         throw new NotImplementedException();
+    }
+
+    private Dal.EmailSending MapTyDalEntity(EmailSending emailSending)
+    {
+        string recipietnsAsString = emailSending.Recipients
+            .Select(x => x.UserId.ToString())
+            .Aggregate((a, b) => a + ',' + b);
+
+        return new()
+        {
+            SendingId = emailSending.EmailSendingId,
+            Name = emailSending.Name,
+            Recipients = recipietnsAsString,
+            MessageTemplateId = emailSending.MessageTemplate.MessageTemplateId,
+        };
+    }
+
+    private async Task<EmailSending> MapToEmailSending(RawEmailSending rawData)
+    {
+        ArgumentNullException.ThrowIfNull(rawData, nameof(rawData));
+
+        EmailSending emailSending = new EmailSending
+        {
+            EmailSendingId = (int)rawData.Sending.SendingId,
+            Name = rawData.Sending.Name,
+            MessageTemplate = new()
+            {
+                MessageTemplateId = (int)rawData.MessageTemplate.MessageTemplateId,
+                Subject = rawData.MessageTemplate.Subject,
+                Body = rawData.MessageTemplate.Body,
+                ContentType = rawData.MessageTemplate.ContentType switch
+                {
+                    "PlainText" => Mailing.Enums.MessageContentType.PlainText,
+                    "Html" => Mailing.Enums.MessageContentType.Html,
+                    _ => throw new ArgumentException(
+                        "ContentType задан неверно {type}",
+                        rawData.MessageTemplate.ContentType)
+                },
+                IsBodyStatic = rawData.MessageTemplate.IsBodyStatic,
+                IsSubjectStatic = rawData.MessageTemplate.IsSubjectStatic,
+                ModelProvider = rawData.ModelProvider is null
+                       ? null
+                       : await MessageModelProviderRepository
+                           .GetMessageModelProviderAsync(rawData.ModelProvider.ModelProviderTypeName)
+            },
+            Recipients = await FakeRecipientRepository
+                   .GetRecipientsByStringAsync(rawData.Sending.Recipients)
+        };
+
+        return emailSending;
     }
 }
