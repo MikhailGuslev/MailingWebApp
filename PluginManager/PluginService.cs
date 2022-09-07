@@ -4,7 +4,6 @@ using PluginManager.Abstractions;
 using PluginManager.Infrastructure;
 using PluginManager.Models;
 using System.Collections.Concurrent;
-using System.Runtime.Loader;
 
 namespace PluginManager;
 
@@ -19,13 +18,12 @@ public sealed class PluginService : IPluginService
         ILogger<PluginService> logger,
         IServiceScopeFactory serviceScopeFactory)
     {
-        ServiceScopeFactory = serviceScopeFactory;
         Logger = logger;
-        AssemblyLoadContext = new("plugins", true);
+        ServiceScopeFactory = serviceScopeFactory;
     }
 
     // NOTE: вызывать обернув в try catch
-    public async Task<IPlugin> GetPluginInstanceAsync(int pluginAssemblyId, object[] arguments)
+    public async Task<IPlugin> GetPluginInstanceAsync(int pluginAssemblyId, params object[] arguments)
     {
         PluginAssemblyLoadContext context = await GetPluginAssemblyLoadContextAsync(pluginAssemblyId);
         return context.GetPluginInstance(arguments);
@@ -101,12 +99,18 @@ public sealed class PluginService : IPluginService
         IPluginAssemblyRepository repository = scope.ServiceProvider
             .GetRequiredService<IPluginAssemblyRepository>();
 
-        PluginAssembly? pluginAssembly = await repository.GetPluginAssemblyAsync(pluginAssemblyId);
+        PluginAssembly pluginAssembly;
 
-        if (pluginAssembly == null)
+        try
         {
-            string error = $"Не удалось получить сборку плагина с ID:{pluginAssemblyId}";
-            throw new PluginManagerException(error);
+            pluginAssembly = await repository.GetPluginAssemblyAsync(pluginAssemblyId);
+        }
+        catch (Exception ex)
+        {
+            string error =
+                $"Не удалось получить сборку плагина с ID:{pluginAssemblyId}. " +
+                $"Возникло исключение: {ex.Message}";
+            throw new PluginManagerException(error, ex);
         }
 
         return pluginAssembly;

@@ -2,7 +2,6 @@
 using LinqToDB;
 using Mailing.Abstractions;
 using PluginManager.Abstractions;
-using PluginManager.Models;
 
 namespace MailingWebApp.Repositories;
 
@@ -22,31 +21,37 @@ public sealed class FakeMessageModelProviderRepository : IMessageModelProviderRe
         ServiceScopeFactory = scopeFactory;
     }
 
-    public async Task<IMessageModelProvider?> GetMessageModelProviderAsync(Type providerType)
+    public async Task<IMessageModelProvider> GetMessageModelProviderAsync(int messageModelProviderId)
     {
-        throw new NotImplementedException();
-    }
+        ModelProvider? modelProvider = await Storage.ModelProvider
+            .FirstOrDefaultAsync(x => x.ModelProviderId == messageModelProviderId);
 
-    public async Task<IMessageModelProvider?> GetMessageModelProviderAsync(string providerTypeName)
-    {
-        ModelProvider? modelProviderDetails = await Storage.ModelProvider
-            .FirstOrDefaultAsync(x => x.ModelProviderTypeName == providerTypeName);
+        if (modelProvider is null)
+        {
+            string error = $"Не удалось получить поставщика модели данных с id:{messageModelProviderId}.";
+            throw new ApplicationException(error);
+        }
 
-        IMessageModelProvider? instance = modelProviderDetails is not null
-            ? await PluginService.GetPluggableTypeInstanceAsync(new InstanceCreationOptions
-            {
-                PluginId = (int)modelProviderDetails.PluginId,
-                PluggableTypeName = modelProviderDetails.ModelProviderTypeName,
-                ConstructorArgumets = new[] { ServiceScopeFactory },
-                InterfaceType = typeof(IMessageModelProvider)
-            }) as IMessageModelProvider
-            : null;
+        IPlugin pluginInstance = await PluginService.GetPluginInstanceAsync(
+            (int)modelProvider.PluginAssemblyId,
+            ServiceScopeFactory);
+
+        IMessageModelProvider? instance = pluginInstance as IMessageModelProvider;
+
+        if (instance is null)
+        {
+            string error =
+                $"Не удалось получить экземпляр поставщика модели данных с id:{messageModelProviderId}. " +
+                "Вместо экземпляра получено значение null.";
+            throw new ApplicationException(error);
+        }
 
         return instance;
     }
 
     public async Task AddMessageModelProviderAsync(IMessageModelProvider modelProvider)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
 }

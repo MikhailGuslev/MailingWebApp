@@ -4,7 +4,7 @@ namespace PluginManager.Abstractions;
 
 public interface IPluginService
 {
-    Task<IPlugin> GetPluginInstanceAsync(int pluginAssemblyId, object[] arguments);
+    Task<IPlugin> GetPluginInstanceAsync(int pluginAssemblyId, params object[] arguments);
     Task<IPluginSettings> GetPluginSettingsInstanceAsync(int pluginAssemblyId);
     Task<IReadOnlyList<PluginAssemblyInformation>> GetPluginAssemblyInformationsAsync();
     Task<PluginAssemblyInformation> GetPluginAssemblyInformationAsync(int pluginAssemblyId);

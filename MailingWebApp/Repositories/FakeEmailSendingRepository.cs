@@ -107,6 +107,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
 
     public async Task AddEmailSendingScheduleAsync(EmailSendingSchedule schedule)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
 
@@ -151,7 +152,7 @@ public sealed class FakeEmailSendingRepository : IEmailSendingRepository
                 ModelProvider = rawData.ModelProvider is null
                        ? null
                        : await MessageModelProviderRepository
-                           .GetMessageModelProviderAsync(rawData.ModelProvider.ModelProviderTypeName)
+                           .GetMessageModelProviderAsync((int)rawData.ModelProvider.ModelProviderId)
             },
             Recipients = await FakeRecipientRepository
                    .GetRecipientsByStringAsync(rawData.Sending.Recipients)
