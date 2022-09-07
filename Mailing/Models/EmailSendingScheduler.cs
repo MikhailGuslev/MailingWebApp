@@ -60,6 +60,7 @@ public sealed class EmailSendingScheduler
 
     public async Task AddEmailSendingScheduleAsync(EmailSending emailSending)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
 

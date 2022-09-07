@@ -39,7 +39,8 @@ public class SendingsController : ControllerBase
     [HttpPost]
     public async Task Post([FromBody] EmailSending emailSending)
     {
-        await EmailSendingSchedule.AddEmailSendingAsync(emailSending);
+        await Task.CompletedTask;
+        throw new NotImplementedException();
     }
 
     // PUT api/<SendingsController>/5
