@@ -16,7 +16,7 @@ internal sealed class PluginAssemblyLoadContext
     {
         arguments = arguments ?? Array.Empty<object>();
 
-        if (this.PluginType is null)
+        if (PluginType is null)
         {
             string error = "Невозможно получить экземпляр плагина используя контекст в который не загружена сборка плагина.";
             throw new PluginManagerException(error);
@@ -49,6 +49,17 @@ internal sealed class PluginAssemblyLoadContext
         }
 
         return pluginInstance;
+    }
+
+    public Type? GetPluginSettingsType()
+    {
+        if (PluginType is null)
+        {
+            string error = "Невозможно получить тип настроек плагина используя контекст в который не загружена сборка плагина.";
+            throw new PluginManagerException(error);
+        }
+
+        return PluginSettingsType;
     }
 
     public void Load(PluginAssembly pluginAssembly)
