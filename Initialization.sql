@@ -15,11 +15,12 @@ create table 'User'
     Email text not null
 );
 
-create table Plugin
+create table PluginAssembly
 (
-    PluginId integer not null,
+    PluginAssemblyId integer not null,
     Name text not null,
     Comment text not null,
+    Settings text not null,
     Data blob not null,
     CreatedDate datetime not null,
     UpdatedDate datetime not null
@@ -28,9 +29,7 @@ create table Plugin
 create table ModelProvider
 (
     ModelProviderId integer not null,
-    ModelProviderTypeName text not null,
-
-    PluginId integer not null
+    PluginAssemblyId integer not null
 );
 
 create table MessageTemplate
