@@ -15,8 +15,7 @@ namespace DataLayer.Entities
 	[Table("ModelProvider")]
 	public class ModelProvider
 	{
-		[Column("ModelProviderId"                         )] public long   ModelProviderId       { get; set; } // integer
-		[Column("ModelProviderTypeName", CanBeNull = false)] public string ModelProviderTypeName { get; set; } = null!; // text(max)
-		[Column("PluginId"                                )] public long   PluginId              { get; set; } // integer
+		[Column("ModelProviderId" )] public long ModelProviderId  { get; set; } // integer
+		[Column("PluginAssemblyId")] public long PluginAssemblyId { get; set; } // integer
 	}
 }
