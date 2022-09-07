@@ -81,6 +81,38 @@ public sealed class PluginService : IPluginService
         throw new NotImplementedException();
     }
 
+    private async Task<PluginAssemblyLoadContext> GetPluginAssemblyLoadContextAsync(int pluginAssemblyId)
+    {
+        PluginAssemblyLoadContext? context = null;
+
+        PluginAssemblyLoadContexts.TryGetValue(pluginAssemblyId, out context);
+
+        if (context is null)
+        {
+            PluginAssembly pluginAssembly = await GetPluginAssembly(pluginAssemblyId);
+            context = new();
+            context.Load(pluginAssembly);
+        }
+
+        bool ok = PluginAssemblyLoadContexts.TryAdd(pluginAssemblyId, context);
+        if (ok is false)
+        {
+            // NOTE: для подстраховки перепроверить наличие контекста в списке зарегистрированных
+            ok = PluginAssemblyLoadContexts.TryGetValue(pluginAssemblyId, out context);
+        }
+
+        if (ok is false || context is null)
+        {
+            string error =
+                $"Не удалось получить контекст загрузки {nameof(PluginAssemblyLoadContext)}" +
+                $"сборки плагина с ID: {pluginAssemblyId}. " +
+                $"Конфликт длоступа к элементам словаря {nameof(PluginAssemblyLoadContexts)}";
+            throw new PluginManagerException(error);
+        }
+
+        return context;
+    }
+
     private async Task<PluginAssembly> GetPluginAssembly(int pluginAssemblyId)
     {
         using IServiceScope scope = ServiceScopeFactory.CreateScope();
