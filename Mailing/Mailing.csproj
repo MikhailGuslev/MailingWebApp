@@ -15,4 +15,8 @@
     <PackageReference Include="Scriban" Version="5.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PluginManager.Abstractions\PluginManager.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

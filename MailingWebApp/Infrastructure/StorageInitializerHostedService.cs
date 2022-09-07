@@ -43,7 +43,7 @@ public sealed class StorageInitializerHostedService : IHostedService
 
         await UserInitialize(storage);
         await MeterReadingsPeriodDetailsInitialize(storage);
-        await PluginInitialize(storage);
+        await PluginAssemblyInitialize(storage);
         await ModelProviderInititalize(storage);
         await MessageTemplateInitialize(storage);
         await EmailSendingInitialize(storage);
@@ -165,7 +165,7 @@ public sealed class StorageInitializerHostedService : IHostedService
         await storage.BulkCopyAsync(entities).TryAsync();
     }
 
-    private async Task PluginInitialize(StorageDb storage)
+    private async Task PluginAssemblyInitialize(StorageDb storage)
     {
 
         string? location = Assembly.GetExecutingAssembly().Location;
@@ -184,21 +184,22 @@ public sealed class StorageInitializerHostedService : IHostedService
 
         DateTime fakeDate = DateTime.Now.AddDays(1);
 
-        List<Plugin> entities = new()
+        List<PluginAssembly> entities = new()
         {
             new()
             {
-                PluginId = 1,
+                PluginAssemblyId = 1,
                 Name = "FakeMessageModelProvider",
                 Comment = "FakeMessageModelProvider",
+                Settings = String.Empty,
                 Data = bytes,
                 CreatedDate = fakeDate,
                 UpdatedDate = fakeDate,
             },
         };
 
-        await storage.DropTableAsync<Plugin>().TryAsync();
-        await storage.CreateTableAsync<Plugin>().TryAsync();
+        await storage.DropTableAsync<PluginAssembly>().TryAsync();
+        await storage.CreateTableAsync<PluginAssembly>().TryAsync();
 
         await storage.BulkCopyAsync(entities).TryAsync();
     }
@@ -210,8 +211,7 @@ public sealed class StorageInitializerHostedService : IHostedService
             new()
             {
                 ModelProviderId = 1,
-                ModelProviderTypeName = "FakeMessageModelProvider",
-                PluginId = 1,
+                PluginAssemblyId = 1,
             }
         };
 
