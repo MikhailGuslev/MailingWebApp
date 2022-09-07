@@ -32,7 +32,7 @@ internal sealed class PluginAssemblyLoadContext
         {
             string error =
                 "Не удалось получить экземпляр плагина из сборки " +
-                $"ID:{PluginAssemblyInformation?.PluginId} Name:{PluginAssemblyInformation?.Name}." +
+                $"ID:{PluginAssemblyInformation?.PluginAssemblyId} Name:{PluginAssemblyInformation?.Name}." +
                 $"Произошло исключение: {ex.Message}.";
             throw new PluginManagerException(error, ex);
         }
@@ -43,7 +43,7 @@ internal sealed class PluginAssemblyLoadContext
         {
             string error =
                 "Не удалось получить экземпляр плагина из сборки " +
-                $"ID:{PluginAssemblyInformation?.PluginId} Name:{PluginAssemblyInformation?.Name}." +
+                $"ID:{PluginAssemblyInformation?.PluginAssemblyId} Name:{PluginAssemblyInformation?.Name}." +
                 "Получено значение null. ";
             throw new PluginManagerException(error);
         }
@@ -109,7 +109,7 @@ internal sealed class PluginAssemblyLoadContext
         {
             string error =
                 $"Не удалось получить тип плагина реализующий {nameof(IPlugin)} из сборки " +
-                $"ID:{PluginAssemblyInformation?.PluginId} Name:{PluginAssemblyInformation?.Name}";
+                $"ID:{PluginAssemblyInformation?.PluginAssemblyId} Name:{PluginAssemblyInformation?.Name}";
             throw new PluginManagerException(error);
         }
 

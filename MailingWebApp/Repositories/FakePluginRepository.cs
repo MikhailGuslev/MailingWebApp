@@ -16,12 +16,13 @@ public sealed class FakePluginRepository : IPluginAssemblyRepository
 
     public async Task<IReadOnlyList<PluginAssembly>> GetAllPluginAssembliesAsync()
     {
-        return await Storage.Plugin
+        return await Storage.PluginAssembly
             .Select(x => new PluginAssembly
             {
-                PluginAssemblyId = (int)x.PluginId,
+                PluginAssemblyId = (int)x.PluginAssemblyId,
                 Name = x.Name,
                 Comment = x.Comment,
+                Settings = x.Settings,
                 Data = x.Data,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
@@ -29,37 +30,40 @@ public sealed class FakePluginRepository : IPluginAssemblyRepository
             .ToListAsync();
     }
 
-    public async Task<PluginAssemblyInformation?> GetPluginAssemblyInformationAsync(int pluginId)
+    public async Task<PluginAssemblyInformation> GetPluginAssemblyInformationAsync(int pluginAssemblyId)
     {
-        return await Storage.Plugin
+        return await Storage.PluginAssembly
             .Select(x => new PluginAssemblyInformation
             {
-                PluginId = (int)x.PluginId,
+                PluginAssemblyId = (int)x.PluginAssemblyId,
                 Name = x.Name,
                 Comment = x.Comment,
+                Settings = x.Settings,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
             })
-            .FirstOrDefaultAsync(x => x.PluginId == pluginId);
+            .FirstAsync(x => x.PluginAssemblyId == pluginAssemblyId);
     }
 
-    public async Task<PluginAssembly?> GetPluginAssemblyAsync(int pluginId)
+    public async Task<PluginAssembly> GetPluginAssemblyAsync(int pluginAssemblyId)
     {
-        return await Storage.Plugin
+        return await Storage.PluginAssembly
             .Select(x => new PluginAssembly
             {
-                PluginAssemblyId = (int)x.PluginId,
+                PluginAssemblyId = (int)x.PluginAssemblyId,
                 Name = x.Name,
                 Comment = x.Comment,
+                Settings = x.Settings,
                 Data = x.Data,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
             })
-            .FirstOrDefaultAsync(x => (int)x.PluginAssemblyId == pluginId);
+            .FirstAsync(x => (int)x.PluginAssemblyId == pluginAssemblyId);
     }
 
     public async Task AddPluginAssemblyAsync(PluginAssembly plugin)
     {
+        await Task.CompletedTask;
         throw new NotImplementedException();
     }
 }

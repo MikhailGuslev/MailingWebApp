@@ -2,7 +2,7 @@
 
 public sealed record class PluginAssemblyInformation
 {
-    public int PluginId { get; init; }
+    public int PluginAssemblyId { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Comment { get; init; } = string.Empty;
     public string Settings { get; init; } = string.Empty;

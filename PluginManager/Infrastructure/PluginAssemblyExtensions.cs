@@ -10,7 +10,7 @@ public static class PluginAssemblyExtensions
 
         return new PluginAssemblyInformation
         {
-            PluginId = pluginAssembly.PluginAssemblyId,
+            PluginAssemblyId = pluginAssembly.PluginAssemblyId,
             Name = pluginAssembly.Name,
             Comment = pluginAssembly.Comment,
             Settings = pluginAssembly.Settings,
