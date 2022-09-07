@@ -37,7 +37,7 @@ namespace DataLayer.Entities
 
 		public ITable<MeterReadingsPeriodDetails> MeterReadingsPeriodDetails => this.GetTable<MeterReadingsPeriodDetails>();
 		public ITable<User>                       User                       => this.GetTable<User>();
-		public ITable<Plugin>                     Plugin                     => this.GetTable<Plugin>();
+		public ITable<PluginAssembly>             PluginAssembly             => this.GetTable<PluginAssembly>();
 		public ITable<ModelProvider>              ModelProvider              => this.GetTable<ModelProvider>();
 		public ITable<MessageTemplate>            MessageTemplate            => this.GetTable<MessageTemplate>();
 		public ITable<EmailSending>               EmailSending               => this.GetTable<EmailSending>();
