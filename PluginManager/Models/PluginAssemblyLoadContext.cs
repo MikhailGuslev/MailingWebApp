@@ -9,26 +9,16 @@ internal sealed class PluginAssemblyLoadContext
 {
     private AssemblyLoadContext? Context;
     private PluginAssemblyInformation? PluginAssemblyInformation;
-    private WeakReference<Type>? PluginTypeRef;
+    private Type? PluginType;
+    private Type? PluginSettingsType;
 
     public IPlugin GetPluginInstance(params object[] arguments)
     {
         arguments = arguments ?? Array.Empty<object>();
 
-        if (PluginTypeRef is null)
+        if (this.PluginType is null)
         {
             string error = "Невозможно получить экземпляр плагина используя контекст в который не загружена сборка плагина.";
-            throw new PluginManagerException(error);
-        }
-
-        _ = PluginTypeRef.TryGetTarget(out Type? pluginType);
-
-        if (pluginType is null)
-        {
-            string error =
-                "Не удалось получить тип плагина из сборки " +
-                $"ID:{PluginAssemblyInformation?.PluginId} Name:{PluginAssemblyInformation?.Name}." +
-                "Ссылка на тип пуста. ";
             throw new PluginManagerException(error);
         }
 
@@ -36,7 +26,7 @@ internal sealed class PluginAssemblyLoadContext
 
         try
         {
-            instance = Activator.CreateInstance(pluginType, arguments);
+            instance = Activator.CreateInstance(PluginType, arguments);
         }
         catch (Exception ex)
         {
@@ -72,23 +62,23 @@ internal sealed class PluginAssemblyLoadContext
             throw new PluginManagerException(error);
         }
 
+        string contextName = pluginAssembly.Name + "_context";
+        Context = new AssemblyLoadContext(contextName, isCollectible: true);
+
         PluginAssemblyInformation = pluginAssembly.GetInformation();
 
         Assembly assembly = GetAssembly(pluginAssembly);
-        Type pluginType = GetPluginType(assembly);
 
-        PluginTypeRef = new WeakReference<Type>(pluginType);
+        PluginType = GetPluginType(assembly);
+        PluginSettingsType = GetPluginSettingsType(assembly);
     }
 
     private Assembly GetAssembly(PluginAssembly pluginAssembly)
     {
-        string contextName = pluginAssembly.Name + "_context";
-        Context = new AssemblyLoadContext(contextName, isCollectible: true);
         using MemoryStream stream = new(pluginAssembly.Data);
-
         try
         {
-            return Context.LoadFromStream(stream);
+            return Context!.LoadFromStream(stream);
         }
         catch (Exception ex)
         {
@@ -113,5 +103,14 @@ internal sealed class PluginAssemblyLoadContext
         }
 
         return pluginType;
+    }
+
+    private Type? GetPluginSettingsType(Assembly assembly)
+    {
+        Type? pluginSettingsType = assembly.ExportedTypes
+            .Where(t => t.IsAssignableTo(typeof(IPluginSettings)))
+            .FirstOrDefault();
+
+        return pluginSettingsType;
     }
 }
