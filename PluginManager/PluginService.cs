@@ -36,9 +36,11 @@ public sealed class PluginService : IPluginService
         return context.GetPluginSettingsType();
     }
 
-    public Task<IPluginSettings> GetPluginSettingsInstanceAsync(int pluginAssemblyId)
+    // NOTE: вызывать обернув в try catch
+    public async Task<IPluginSettings?> GetPluginSettingsInstanceAsync(int pluginAssemblyId)
     {
-        throw new NotImplementedException();
+        PluginAssemblyLoadContext context = await GetPluginAssemblyLoadContextAsync(pluginAssemblyId);
+        return context.GetPluginSettingsInstance();
     }
 
     public Task<IReadOnlyList<PluginAssemblyInformation>> GetPluginAssemblyInformationsAsync()

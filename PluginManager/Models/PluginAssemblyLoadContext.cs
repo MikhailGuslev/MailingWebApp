@@ -62,6 +62,49 @@ internal sealed class PluginAssemblyLoadContext
         return PluginSettingsType;
     }
 
+    public IPluginSettings? GetPluginSettingsInstance()
+    {
+        if (PluginAssemblyInformation is null)
+        {
+            throw new PluginManagerException("Осутствуют данные о сборке плагина");
+        }
+
+        Type? settingsType = GetPluginSettingsType();
+
+        if (settingsType is null)
+        {
+            return null;
+        }
+
+        object? instance = null;
+
+        try
+        {
+            instance = Activator.CreateInstance(settingsType);
+        }
+        catch (Exception ex)
+        {
+            string error =
+                $"Не удалось получить экземпляр настроек плагина {PluginAssemblyInformation.PluginAssemblyId} " +
+                $"произошло исключение {ex.Message}";
+            throw new PluginManagerException(error);
+        }
+
+        IPluginSettings? settingsInstance = instance is not null
+            ? instance as IPluginSettings
+            : null;
+
+        if (settingsInstance is null)
+        {
+            string error =
+                $"Не удалось получить экземпляр настроек плагина {PluginAssemblyInformation.PluginAssemblyId} " +
+                $"получено значение null";
+            throw new PluginManagerException(error);
+        }
+
+        return settingsInstance;
+    }
+
     public void Load(PluginAssembly pluginAssembly)
     {
         if (Context is not null)
