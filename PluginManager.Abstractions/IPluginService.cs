@@ -10,4 +10,5 @@ public interface IPluginService
     Task<PluginAssemblyInformation> GetPluginAssemblyInformationAsync(int pluginAssemblyId);
     Task AddPluginAssemblyAsync(PluginAssembly plugin);
     Task UpdatePluginAssemblyAsync(PluginAssembly plugin);
+    void UnloadPluginAssembly(int pluginAssemblyId);
 }

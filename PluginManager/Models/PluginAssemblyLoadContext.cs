@@ -127,6 +127,36 @@ internal sealed class PluginAssemblyLoadContext
         PluginSettingsType = GetPluginSettingsType(assembly);
     }
 
+    public void Unload(Action<PluginAssemblyInformation>? unloadedHandler = null)
+    {
+        if (Context is null || PluginAssemblyInformation is null)
+        {
+            string error = "Невозможно выгрузить контекст в который не загружена сборка плагина.";
+            throw new PluginManagerException(error);
+        }
+
+        AssemblyLoadContext context = Context;
+        PluginAssemblyInformation assemblyInformation = PluginAssemblyInformation;
+
+        Context = null;
+        PluginAssemblyInformation = null;
+        PluginType = null;
+        PluginSettingsType = null;
+
+        if (unloadedHandler is not null)
+        {
+            context.Unloading += OnUnloaded;
+        }
+
+        context.Unload();
+
+        void OnUnloaded(AssemblyLoadContext ctx)
+        {
+            ctx.Unloading -= OnUnloaded;
+            unloadedHandler?.Invoke(assemblyInformation);
+        }
+    }
+
     private Assembly GetAssembly(PluginAssembly pluginAssembly)
     {
         using MemoryStream stream = new(pluginAssembly.Data);

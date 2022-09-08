@@ -63,6 +63,37 @@ public sealed class PluginService : IPluginService
         throw new NotImplementedException();
     }
 
+    public void UnloadPluginAssembly(int pluginAssemblyId)
+    {
+        PluginAssemblyLoadContext? context = null;
+        PluginAssemblyLoadContexts.TryGetValue(pluginAssemblyId, out context);
+
+        if (context is null)
+        {
+            string error =
+                $"Невозможно выгрузить сборку плагина id:{pluginAssemblyId}, " +
+                $"сборка не загружена";
+            throw new PluginManagerException(error);
+        }
+
+        PluginAssemblyLoadContexts.TryRemove(pluginAssemblyId, out context);
+        if (context is null)
+        {
+            string error =
+                $"Невозможно выгрузить сборку плагина id:{pluginAssemblyId}, " +
+                $"не удалось извлечь сборку из списка загруженных.";
+            throw new PluginManagerException(error);
+        }
+
+        context.Unload(HandleUnloaded);
+
+        void HandleUnloaded(PluginAssemblyInformation pluginInfo)
+        {
+            string info = $"Сборка {pluginInfo.PluginAssemblyId} {pluginInfo.Name} выгружена.";
+            Logger.LogInformation(info);
+        }
+    }
+
     private async Task<PluginAssemblyLoadContext> GetPluginAssemblyLoadContextAsync(int pluginAssemblyId)
     {
         PluginAssemblyLoadContext? context = null;
